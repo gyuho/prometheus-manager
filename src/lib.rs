@@ -71,56 +71,49 @@ impl<'a> Entry<'a> {
             return Entry::Empty;
         }
 
-        match HELP_RE.captures(line) {
-            Some(ref caps) => {
-                return match (caps.get(1), caps.get(2)) {
-                    (Some(ref metric_name), Some(ref doc)) => Entry::Doc {
-                        metric_name: metric_name.as_str(),
-                        doc: doc.as_str(),
-                    },
-                    _ => Entry::Ignored,
-                }
-            }
-            None => {}
+        if let Some(ref caps) = HELP_RE.captures(line) {
+            return match (caps.get(1), caps.get(2)) {
+                (Some(ref metric_name), Some(ref doc)) => Entry::Doc {
+                    metric_name: metric_name.as_str(),
+                    doc: doc.as_str(),
+                },
+                _ => Entry::Ignored,
+            };
         }
 
-        match TYPE_RE.captures(line) {
-            Some(ref caps) => {
-                return match (caps.get(1), caps.get(2)) {
-                    (Some(ref metric_name), Some(ref sample_type)) => {
-                        let sample_type = MetricKind::from_str(sample_type.as_str()).unwrap();
-                        Entry::Type {
-                            metric_name: match sample_type {
-                                MetricKind::Histogram => format!("{}_bucket", metric_name.as_str()),
-                                _ => metric_name.as_str().to_string(),
-                            },
-                            sample_type,
-                        }
+        if let Some(ref caps) = TYPE_RE.captures(line) {
+            return match (caps.get(1), caps.get(2)) {
+                (Some(ref metric_name), Some(ref sample_type)) => {
+                    let sample_type = MetricKind::from_str(sample_type.as_str()).unwrap();
+                    Entry::Type {
+                        metric_name: match sample_type {
+                            MetricKind::Histogram => format!("{}_bucket", metric_name.as_str()),
+                            _ => metric_name.as_str().to_string(),
+                        },
+                        sample_type,
                     }
-                    _ => Entry::Ignored,
                 }
-            }
-            None => {}
+                _ => Entry::Ignored,
+            };
         }
 
-        match METRIC_RE.captures(line) {
-            Some(ref caps) => {
-                return match (
-                    caps.name("name"),
-                    caps.name("labels"),
-                    caps.name("value"),
-                    caps.name("timestamp"),
-                ) {
-                    (Some(ref name), labels, Some(ref value), timestamp) => Entry::Metric {
-                        metric_name: name.as_str(),
-                        labels: labels.map(|c| c.as_str()),
-                        value: value.as_str(),
-                        timestamp: timestamp.map(|c| c.as_str()),
-                    },
-                    _ => Entry::Ignored,
-                }
-            }
-            None => Entry::Ignored,
+        if let Some(ref caps) = METRIC_RE.captures(line) {
+            return match (
+                caps.name("name"),
+                caps.name("labels"),
+                caps.name("value"),
+                caps.name("timestamp"),
+            ) {
+                (Some(ref name), labels, Some(ref value), timestamp) => Entry::Metric {
+                    metric_name: name.as_str(),
+                    labels: labels.map(|c| c.as_str()),
+                    value: value.as_str(),
+                    timestamp: timestamp.map(|c| c.as_str()),
+                },
+                _ => Entry::Ignored,
+            };
+        } else {
+            Entry::Ignored
         }
     }
 }
