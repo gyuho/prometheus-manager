@@ -17,3 +17,4 @@ log = "0.4.17"
 regex = "1.6.0"
 
 [dev-dependencies]
+rust-embed = "6.4.0"

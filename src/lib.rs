@@ -365,7 +365,7 @@ impl Scrape {
         let mut docs: HashMap<String, String> = HashMap::new();
         let mut types: HashMap<String, MetricKind> = HashMap::new();
         let mut buckets: HashMap<String, Metric> = HashMap::new();
-        let mut samples: Vec<Metric> = vec![];
+        let mut metrics: Vec<Metric> = vec![];
         for line in lines {
             let cur = match line {
                 Ok(v) => v,
@@ -443,7 +443,7 @@ impl Scrape {
                                     None
                                 }
                             };
-                            samples.push(Metric {
+                            metrics.push(Metric {
                                 metric: metric_name.to_string(),
                                 labels,
                                 value: match ty {
@@ -459,17 +459,52 @@ impl Scrape {
                 _ => {}
             }
         }
-        samples.extend(buckets.drain().map(|(_k, v)| v).collect::<Vec<_>>());
-        Ok(Scrape {
-            docs,
-            metrics: samples,
-        })
+        metrics.extend(buckets.drain().map(|(_k, v)| v).collect::<Vec<_>>());
+        Ok(Scrape { docs, metrics })
     }
 }
 
-/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_parse_samples --exact --show-output
+lazy_static! {
+    static ref NOT_FOUND_METRIC: Metric = Metric {
+        metric: "not_found".to_string(),
+        value: Value::Gauge(0.0),
+        ..Default::default()
+    };
+}
+
+pub fn match_metric<'a, F>(samples: &'a [Metric], f: F) -> &'a Metric
+where
+    for<'r> F: FnMut(&'r &'a Metric) -> bool,
+{
+    let metric = samples.iter().find(f);
+    if let Some(v) = metric {
+        return v;
+    }
+    &NOT_FOUND_METRIC
+}
+
+pub fn match_metrics<'a, F>(samples: &'a [Metric], f: F) -> Vec<&'a Metric>
+where
+    for<'r> F: FnMut(&'r &'a Metric) -> bool,
+{
+    let mut metrics: Vec<&'a Metric> = Vec::new();
+
+    let mut iter = samples.iter().filter(f);
+    loop {
+        let metric = iter.next();
+        if let Some(v) = metric {
+            metrics.push(v);
+            continue;
+        }
+        break;
+    }
+
+    metrics
+}
+
+/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_parse_metrics --exact --show-output
 #[test]
-fn test_parse_samples() {
+fn test_parse_metrics() {
     let scrape = r#"
 # HELP http_requests_total The total number of HTTP requests.
 # TYPE http_requests_total counter
@@ -510,10 +545,16 @@ rpc_duration_seconds{quantile="0.9"} 9001
 rpc_duration_seconds{quantile="0.99"} 76656
 rpc_duration_seconds_sum 1.7560473e+07
 rpc_duration_seconds_count 2693
+
+# TYPE avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_size_sum gauge
+avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_size_sum 441892
+# HELP avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum Sum of time (in ns) of a has
+# TYPE avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum gauge
+avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum 4.50437507e+08
 "#;
 
     let s = Scrape::from_bytes(scrape.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 12);
+    assert_eq!(s.metrics.len(), 14);
 
     assert_eq!(
         match_metric(&s.metrics, |s| s.metric
@@ -521,8 +562,7 @@ rpc_duration_seconds_count 2693
         &Metric {
             metric: "metric_without_timestamp_and_labels".to_string(),
             value: Value::Untyped(12.47),
-            labels: None,
-            timestamp: None,
+            ..Default::default()
         }
     );
 
@@ -531,8 +571,7 @@ rpc_duration_seconds_count 2693
         &Metric {
             metric: "metric_counter_with_no_label".to_string(),
             value: Value::Counter(100.10),
-            labels: None,
-            timestamp: None,
+            ..Default::default()
         }
     );
 
@@ -567,26 +606,68 @@ rpc_duration_seconds_count 2693
             timestamp: Some(Utc.timestamp_millis(1395066363000)),
         }
     );
+
+    assert_eq!(
+        match_metric(&s.metrics, |s| {
+            s.metric
+                == "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_size_sum"
+        }),
+        &Metric {
+            metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_size_sum"
+                .to_string(),
+            value: Value::Gauge(441892f64),
+            ..Default::default()
+        }
+    );
+
+    assert_eq!(
+        match_metric(&s.metrics, |s| {
+            s.metric == "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum"
+        }),
+        &Metric {
+            metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum"
+                .to_string(),
+            value: Value::Gauge(4.50437507e+08f64),
+            ..Default::default()
+        }
+    );
 }
 
-lazy_static! {
-    static ref NOT_FOUND_METRIC: Metric = Metric {
-        metric: "not_found".to_string(),
-        value: Value::Gauge(0.0),
-        labels: None,
-        timestamp: None
-    };
-}
+/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_parse_metrics_from_file --exact --show-output
+#[test]
+fn test_parse_metrics_from_file() {
+    use rust_embed::RustEmbed;
 
-pub fn match_metric<'a, F>(samples: &'a [Metric], f: F) -> &'a Metric
-where
-    for<'r> F: FnMut(&'r &'a Metric) -> bool,
-{
-    let metric = samples.iter().find(f);
-    if let Some(v) = metric {
-        return v;
-    }
-    &NOT_FOUND_METRIC
+    #[derive(RustEmbed)]
+    #[folder = "artifacts/"]
+    #[prefix = "artifacts/"]
+    struct Asset;
+
+    let metrics_raw = Asset::get("artifacts/avalanchego.v1.7.17.metrics").unwrap();
+    let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
+
+    let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
+    assert_eq!(s.metrics.len(), 2127);
+
+    assert_eq!(
+        match_metrics(&s.metrics, |s| s.metric.contains(
+            "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_put_size_",
+        )),
+        vec![
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_put_size_count"
+                    .to_string(),
+                value: Value::Counter(7.469948e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_put_size_sum"
+                    .to_string(),
+                value: Value::Gauge(2.1210190212e+10f64),
+                ..Default::default()
+            },
+        ]
+    );
 }
 
 pub fn pair_to_string(pair: &(&str, &str)) -> (String, String) {
