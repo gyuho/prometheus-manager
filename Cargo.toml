@@ -1,8 +1,8 @@
 [package]
 name = "prometheus-manager"
-version = "0.0.2" # https://crates.io/crates/prometheus-manager
+version = "0.0.3" # https://crates.io/crates/prometheus-manager
 edition = "2021"
-rust-version = "1.62"
+rust-version = "1.63"
 publish = true
 description = "Rust random manager"
 repository = "https://github.com/gyuho/prometheus-manager"
@@ -10,7 +10,7 @@ readme = "README.md"
 license = "Apache-2.0"
 
 [dependencies]
-chrono = "0.4.19"
+chrono = "0.4.22"
 human-readable = "0.0.1"
 lazy_static = "1.4.0"
 log = "0.4.17"
