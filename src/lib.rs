@@ -7,7 +7,7 @@ use std::{
 
 use chrono::{DateTime, TimeZone, Utc};
 use lazy_static::lazy_static;
-use regex::Regex;
+use regex::{Regex, RegexSet};
 
 // ref. https://github.com/cmars/prometheus-scrape/blob/master/src/lib.rs
 // ref. https://github.com/ccakes/prometheus-parse-rs/blob/master/src/lib.rs
@@ -472,24 +472,26 @@ lazy_static! {
     };
 }
 
-pub fn match_metric<'a, F>(samples: &'a [Metric], f: F) -> &'a Metric
+/// Returns the first metric that evaluates to "true" for the function.
+pub fn find_first<'a, F>(data: &'a [Metric], f: F) -> &'a Metric
 where
     for<'r> F: FnMut(&'r &'a Metric) -> bool,
 {
-    let metric = samples.iter().find(f);
+    let metric = data.iter().find(f);
     if let Some(v) = metric {
         return v;
     }
     &NOT_FOUND_METRIC
 }
 
-pub fn match_metrics<'a, F>(samples: &'a [Metric], f: F) -> Vec<&'a Metric>
+/// Returns all metrics that evaluate to "true" for the function.
+pub fn find_all<'a, F>(data: &'a [Metric], f: F) -> Vec<&'a Metric>
 where
     for<'r> F: FnMut(&'r &'a Metric) -> bool,
 {
     let mut metrics: Vec<&'a Metric> = Vec::new();
 
-    let mut iter = samples.iter().filter(f);
+    let mut iter = data.iter().filter(f);
     loop {
         let metric = iter.next();
         if let Some(v) = metric {
@@ -502,9 +504,32 @@ where
     metrics
 }
 
-/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_parse_metrics --exact --show-output
+/// Returns all metrics that evaluate to "true" for the regex.
+/// If called in a loop, use "lazy_static" to ensure that regular expressions
+/// are compiled exactly once.
+/// ref. https://github.com/rust-lang/regex#usage-avoid-compiling-the-same-regex-in-a-loop
+pub fn match_all<'a>(data: &'a [Metric], re: Regex) -> Vec<&'a Metric> {
+    log::debug!("matching metrics by regex {}", re);
+    find_all(data, |s| re.is_match(s.metric.as_str()))
+}
+
+/// Returns all metrics that evaluate to "true" for the regex set.
+/// If called in a loop, use "lazy_static" to ensure that regular expressions
+/// are compiled exactly once.
+/// ref. https://github.com/rust-lang/regex#usage-avoid-compiling-the-same-regex-in-a-loop
+pub fn match_set_all<'a>(data: &'a [Metric], rset: RegexSet) -> Vec<&'a Metric> {
+    log::debug!("matching metrics by regex set {:?}", rset);
+    find_all(data, |s| rset.is_match(s.metric.as_str()))
+}
+
+/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_parse_find_first --exact --show-output
 #[test]
-fn test_parse_metrics() {
+fn test_parse_find_first() {
+    let _ = env_logger::builder()
+        .filter_level(log::LevelFilter::Debug)
+        .is_test(true)
+        .try_init();
+
     let scrape = r#"
 # HELP http_requests_total The total number of HTTP requests.
 # TYPE http_requests_total counter
@@ -557,7 +582,7 @@ avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum 4.5043750
     assert_eq!(s.metrics.len(), 14);
 
     assert_eq!(
-        match_metric(&s.metrics, |s| s.metric
+        find_first(&s.metrics, |s| s.metric
             == "metric_without_timestamp_and_labels"),
         &Metric {
             metric: "metric_without_timestamp_and_labels".to_string(),
@@ -567,7 +592,7 @@ avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum 4.5043750
     );
 
     assert_eq!(
-        match_metric(&s.metrics, |s| s.metric == "metric_counter_with_no_label"),
+        find_first(&s.metrics, |s| s.metric == "metric_counter_with_no_label"),
         &Metric {
             metric: "metric_counter_with_no_label".to_string(),
             value: Value::Counter(100.10),
@@ -576,7 +601,7 @@ avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum 4.5043750
     );
 
     assert_eq!(
-        match_metric(&s.metrics, |s| s.metric == "http_requests_total"
+        find_first(&s.metrics, |s| s.metric == "http_requests_total"
             && s.labels.clone().unwrap().get("code") == Some("200")),
         &Metric {
             metric: "http_requests_total".to_string(),
@@ -592,7 +617,7 @@ avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum 4.5043750
     );
 
     assert_eq!(
-        match_metric(&s.metrics, |s| s.metric == "http_requests_total"
+        find_first(&s.metrics, |s| s.metric == "http_requests_total"
             && s.labels.clone().unwrap().get("code") == Some("400")),
         &Metric {
             metric: "http_requests_total".to_string(),
@@ -608,7 +633,7 @@ avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum 4.5043750
     );
 
     assert_eq!(
-        match_metric(&s.metrics, |s| {
+        find_first(&s.metrics, |s| {
             s.metric
                 == "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_size_sum"
         }),
@@ -621,7 +646,7 @@ avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum 4.5043750
     );
 
     assert_eq!(
-        match_metric(&s.metrics, |s| {
+        find_first(&s.metrics, |s| {
             s.metric == "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum"
         }),
         &Metric {
@@ -633,10 +658,15 @@ avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum 4.5043750
     );
 }
 
-/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_parse_metrics_from_file --exact --show-output
+/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_parse_find_all --exact --show-output
 #[test]
-fn test_parse_metrics_from_file() {
+fn test_parse_find_all() {
     use rust_embed::RustEmbed;
+
+    let _ = env_logger::builder()
+        .filter_level(log::LevelFilter::Debug)
+        .is_test(true)
+        .try_init();
 
     #[derive(RustEmbed)]
     #[folder = "artifacts/"]
@@ -650,7 +680,7 @@ fn test_parse_metrics_from_file() {
     assert_eq!(s.metrics.len(), 2127);
 
     assert_eq!(
-        match_metrics(&s.metrics, |s| s.metric.contains(
+        find_all(&s.metrics, |s| s.metric.contains(
             "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_put_size_",
         )),
         vec![
@@ -664,6 +694,104 @@ fn test_parse_metrics_from_file() {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_put_size_sum"
                     .to_string(),
                 value: Value::Gauge(2.1210190212e+10f64),
+                ..Default::default()
+            },
+        ]
+    );
+}
+
+/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_parse_match_all --exact --show-output
+#[test]
+fn test_parse_match_all() {
+    use rust_embed::RustEmbed;
+
+    let _ = env_logger::builder()
+        .filter_level(log::LevelFilter::Debug)
+        .is_test(true)
+        .try_init();
+
+    #[derive(RustEmbed)]
+    #[folder = "artifacts/"]
+    #[prefix = "artifacts/"]
+    struct Asset;
+
+    let metrics_raw = Asset::get("artifacts/avalanchego.v1.7.17.metrics").unwrap();
+    let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
+
+    let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
+    assert_eq!(s.metrics.len(), 2127);
+
+    let re = Regex::new(r"^avalanche_(([0-9a-zA-Z]+)+){3,}_db_batch_put_size[\s\S]*$").unwrap();
+    assert_eq!(
+        match_all(&s.metrics, re),
+        vec![
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_put_size_count"
+                    .to_string(),
+                value: Value::Counter(7.469948e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_put_size_sum"
+                    .to_string(),
+                value: Value::Gauge(2.1210190212e+10f64),
+                ..Default::default()
+            },
+        ]
+    );
+}
+
+/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_parse_match_set_all --exact --show-output
+#[test]
+fn test_parse_match_set_all() {
+    use rust_embed::RustEmbed;
+
+    let _ = env_logger::builder()
+        .filter_level(log::LevelFilter::Debug)
+        .is_test(true)
+        .try_init();
+
+    #[derive(RustEmbed)]
+    #[folder = "artifacts/"]
+    #[prefix = "artifacts/"]
+    struct Asset;
+
+    let metrics_raw = Asset::get("artifacts/avalanchego.v1.7.17.metrics").unwrap();
+    let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
+
+    let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
+    assert_eq!(s.metrics.len(), 2127);
+
+    let rset = RegexSet::new(&[
+        r"^avalanche_(([0-9a-zA-Z]+)+){3,}_db_batch_put_size[\s\S]*$",
+        r"^avalanche_(([0-9a-zA-Z]+)+){3,}_db_batch_replay[\s\S]*$",
+    ])
+    .unwrap();
+    assert_eq!(
+        match_set_all(&s.metrics, rset),
+        vec![
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_put_size_count"
+                    .to_string(),
+                value: Value::Counter(7.469948e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_put_size_sum"
+                    .to_string(),
+                value: Value::Gauge(2.1210190212e+10f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_replay_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_replay_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
                 ..Default::default()
             },
         ]
