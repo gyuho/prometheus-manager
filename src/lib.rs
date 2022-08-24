@@ -762,25 +762,28 @@ fn test_parse_match_set_all() {
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
     assert_eq!(s.metrics.len(), 2127);
 
-    let rset = RegexSet::new(&[
-        r"^avalanche_(([0-9a-zA-Z]+)+){40,}_blks_accepted[\s\S]*$",
-        r"^avalanche_(([0-9a-zA-Z]+)+){40,}_blks_built$",
-        r"^avalanche_(([0-9a-zA-Z]+)+){40,}_blks_rejected[\s\S]*$",
-        r"^avalanche_(([0-9a-zA-Z]+)+){40,}_db_batch_put_count$",
-        r"^avalanche_(([0-9a-zA-Z]+)+){40,}_db_batch_put_sum$",
-        r"^avalanche_(([0-9a-zA-Z]+)+){40,}_last_accepted_height$",
-        r"^avalanche_(([0-9a-zA-Z]+)+){40,}_vm_eth_rpc_failure$",
-        r"^avalanche_(([0-9a-zA-Z]+)+){40,}_vm_eth_rpc_requests$",
-        r"^avalanche_(([0-9a-zA-Z]+)+){40,}_vm_eth_rpc_success$",
-        r"^avalanche_[C|P|X]_benchlist_benched_num$",
-        r"^avalanche_[C|P]_blks_accepted[\s\S]*$",
-        r"^avalanche_[C|P]_blks_accepted[\s\S]*$",
-        r"^avalanche_[C|P|X]_db_get_count$",
-        r"^avalanche_[C|P|X]_db_read_size_sum$",
-        r"^avalanche_[C|P|X]_db_write_size_sum$",
-        r"^avalanche_[C|P|X]_polls_[\s\S]*$",
-    ])
-    .unwrap();
+    lazy_static! {
+        static ref REGEXES: Vec<String> = vec![
+            r"^avalanche_(([0-9a-zA-Z]+)+){40,}_blks_accepted[\s\S]*$".to_string(),
+            r"^avalanche_(([0-9a-zA-Z]+)+){40,}_blks_built$".to_string(),
+            r"^avalanche_(([0-9a-zA-Z]+)+){40,}_blks_rejected[\s\S]*$".to_string(),
+            r"^avalanche_(([0-9a-zA-Z]+)+){40,}_db_batch_put_count$".to_string(),
+            r"^avalanche_(([0-9a-zA-Z]+)+){40,}_db_batch_put_sum$".to_string(),
+            r"^avalanche_(([0-9a-zA-Z]+)+){40,}_last_accepted_height$".to_string(),
+            r"^avalanche_(([0-9a-zA-Z]+)+){40,}_vm_eth_rpc_failure$".to_string(),
+            r"^avalanche_(([0-9a-zA-Z]+)+){40,}_vm_eth_rpc_requests$".to_string(),
+            r"^avalanche_(([0-9a-zA-Z]+)+){40,}_vm_eth_rpc_success$".to_string(),
+            r"^avalanche_[C|P|X]_benchlist_benched_num$".to_string(),
+            r"^avalanche_[C|P]_blks_accepted[\s\S]*$".to_string(),
+            r"^avalanche_[C|P]_blks_accepted[\s\S]*$".to_string(),
+            r"^avalanche_[C|P|X]_db_get_count$".to_string(),
+            r"^avalanche_[C|P|X]_db_read_size_sum$".to_string(),
+            r"^avalanche_[C|P|X]_db_write_size_sum$".to_string(),
+            r"^avalanche_[C|P|X]_polls_[\s\S]*$".to_string(),
+        ];
+    }
+
+    let rset = RegexSet::new(REGEXES.to_vec()).unwrap();
     assert_eq!(
         match_name_set_all(&s.metrics, rset),
         vec![
