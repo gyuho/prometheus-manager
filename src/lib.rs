@@ -504,21 +504,21 @@ where
     metrics
 }
 
-/// Returns all metrics that evaluate to "true" for the regex.
+/// Returns all metrics that evaluate to "true" for the regex on the metrics name.
 /// If called in a loop, use "lazy_static" to ensure that regular expressions
 /// are compiled exactly once.
 /// ref. https://github.com/rust-lang/regex#usage-avoid-compiling-the-same-regex-in-a-loop
-pub fn match_all<'a>(data: &'a [Metric], re: Regex) -> Vec<&'a Metric> {
-    log::debug!("matching metrics by regex {}", re);
+pub fn match_name_all<'a>(data: &'a [Metric], re: Regex) -> Vec<&'a Metric> {
+    log::debug!("matching metrics name by regex {}", re);
     find_all(data, |s| re.is_match(s.metric.as_str()))
 }
 
-/// Returns all metrics that evaluate to "true" for the regex set.
+/// Returns all metrics that evaluate to "true" for the regex set on the metrics name.
 /// If called in a loop, use "lazy_static" to ensure that regular expressions
 /// are compiled exactly once.
 /// ref. https://github.com/rust-lang/regex#usage-avoid-compiling-the-same-regex-in-a-loop
-pub fn match_set_all<'a>(data: &'a [Metric], rset: RegexSet) -> Vec<&'a Metric> {
-    log::debug!("matching metrics by regex set {:?}", rset);
+pub fn match_name_set_all<'a>(data: &'a [Metric], rset: RegexSet) -> Vec<&'a Metric> {
+    log::debug!("matching metrics name by regex set {:?}", rset);
     find_all(data, |s| rset.is_match(s.metric.as_str()))
 }
 
@@ -723,7 +723,7 @@ fn test_parse_match_all() {
 
     let re = Regex::new(r"^avalanche_(([0-9a-zA-Z]+)+){3,}_db_batch_put_size[\s\S]*$").unwrap();
     assert_eq!(
-        match_all(&s.metrics, re),
+        match_name_all(&s.metrics, re),
         vec![
             &Metric {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_put_size_count"
@@ -763,13 +763,38 @@ fn test_parse_match_set_all() {
     assert_eq!(s.metrics.len(), 2127);
 
     let rset = RegexSet::new(&[
+        r"^avalanche_(([0-9a-zA-Z]+)+){3,}_blks_accepted_count$",
+        r"^avalanche_(([0-9a-zA-Z]+)+){3,}_blks_accepted_sum$",
+        r"^avalanche_(([0-9a-zA-Z]+)+){3,}_blks_built$",
         r"^avalanche_(([0-9a-zA-Z]+)+){3,}_db_batch_put_size[\s\S]*$",
-        r"^avalanche_(([0-9a-zA-Z]+)+){3,}_db_batch_replay[\s\S]*$",
+        r"^avalanche_(([0-9a-zA-Z]+)+){3,}_vm_eth_rpc_requests$",
+        r"^avalanche_(([0-9a-zA-Z]+)+){3,}_vm_eth_rpc_success$",
+        r"^avalanche_[C|P|X]_benchlist_benched_num$",
+        r"^avalanche_[C|P]_blks_accepted_count$",
+        r"^avalanche_[C|P]_blks_accepted_sum$",
     ])
     .unwrap();
     assert_eq!(
-        match_set_all(&s.metrics, rset),
+        match_name_set_all(&s.metrics, rset),
         vec![
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_blks_accepted_count"
+                    .to_string(),
+                value: Value::Counter(43240f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_blks_accepted_sum"
+                    .to_string(),
+                value: Value::Gauge(9.81317938649e+11f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_blks_built"
+                    .to_string(),
+                value: Value::Counter(4205f64),
+                ..Default::default()
+            },
             &Metric {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_put_size_count"
                     .to_string(),
@@ -783,13 +808,55 @@ fn test_parse_match_set_all() {
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_replay_count"
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_eth_rpc_requests"
                     .to_string(),
-                value: Value::Counter(0f64),
+                value: Value::Gauge(4.307051e+06f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_replay_sum"
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_eth_rpc_success"
+                    .to_string(),
+                value: Value::Gauge(4.307051e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_benchlist_benched_num"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_blks_accepted_count"
+                    .to_string(),
+                value: Value::Counter(27f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_blks_accepted_sum"
+                    .to_string(),
+                value: Value::Gauge(1.62497901e+08f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_benchlist_benched_num"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_blks_accepted_count"
+                    .to_string(),
+                value: Value::Counter(39f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_blks_accepted_sum"
+                    .to_string(),
+                value: Value::Gauge(4.30488494e+08f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_benchlist_benched_num"
                     .to_string(),
                 value: Value::Gauge(0f64),
                 ..Default::default()
