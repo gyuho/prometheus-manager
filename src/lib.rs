@@ -211,17 +211,18 @@ impl Metric {
         }
     }
 
+    /// Stringify the metric name with labels (if any).
     pub fn name_with_labels(&self) -> String {
         if let Some(labels) = &self.labels {
             let mut pairs: Vec<String> = Vec::with_capacity(labels.len());
             for (k, v) in labels.iter() {
-                pairs.push(format!("{}_{}", k.replace(" ", ""), v.replace(" ", "")));
+                pairs.push(format!("{}_{}", k.replace(' ', ""), v.replace(' ', "")));
             }
             // sort in lexicographic increasing order
             pairs.sort();
             format!("{}_{}", self.metric, pairs.join("_"))
         } else {
-            format!("{}", self.metric)
+            self.metric.clone()
         }
     }
 }
