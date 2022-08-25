@@ -998,7 +998,6 @@ fn test_load_regexes() {
     use rust_embed::RustEmbed;
     use serde::{Deserialize, Serialize};
 
-    /// Represents each anchor/non-anchor node.
     #[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
     #[serde(rename_all = "snake_case")]
     struct Regexes {
