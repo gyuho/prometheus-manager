@@ -1,6 +1,6 @@
 [package]
 name = "prometheus-manager"
-version = "0.0.7" # https://crates.io/crates/prometheus-manager
+version = "0.0.8" # https://crates.io/crates/prometheus-manager
 edition = "2021"
 rust-version = "1.63"
 publish = true
