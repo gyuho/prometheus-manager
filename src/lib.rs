@@ -1163,7 +1163,7 @@ pub struct Rules {
 
 /// Loads the "Rules" from the file.
 pub fn load_rules(file_path: &str) -> io::Result<Rules> {
-    log::info!("loading filters from {}", file_path);
+    log::info!("loading rules from {}", file_path);
 
     if !Path::new(file_path).exists() {
         return Err(Error::new(
