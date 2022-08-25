@@ -230,6 +230,14 @@ impl Metric {
 #[test]
 fn test_metric_name_with_labels() {
     assert_eq!(
+        "http_requests_total",
+        &Metric {
+            metric: "http_requests_total".to_string(),
+            ..Default::default()
+        }
+        .name_with_labels(),
+    );
+    assert_eq!(
         "http_requests_total_code_400_method_post",
         &Metric {
             metric: "http_requests_total".to_string(),
