@@ -210,6 +210,53 @@ impl Metric {
             timestamp: None,
         }
     }
+
+    pub fn name_with_labels(&self) -> String {
+        if let Some(labels) = &self.labels {
+            let mut pairs: Vec<String> = Vec::with_capacity(labels.len());
+            for (k, v) in labels.iter() {
+                pairs.push(format!("{}_{}", k.replace(" ", ""), v.replace(" ", "")));
+            }
+            // sort in lexicographic increasing order
+            pairs.sort();
+            format!("{}_{}", self.metric, pairs.join("_"))
+        } else {
+            format!("{}", self.metric)
+        }
+    }
+}
+
+/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_metric_name_with_labels --exact --show-output
+#[test]
+fn test_metric_name_with_labels() {
+    assert_eq!(
+        "http_requests_total_code_400_method_post",
+        &Metric {
+            metric: "http_requests_total".to_string(),
+            labels: Some(Labels(
+                [("method", "post"), ("code", "400")]
+                    .iter()
+                    .map(pair_to_string)
+                    .collect()
+            )),
+            ..Default::default()
+        }
+        .name_with_labels(),
+    );
+    assert_eq!(
+        "http_requests_total_code_400_method_postpost",
+        &Metric {
+            metric: "http_requests_total".to_string(),
+            labels: Some(Labels(
+                [("method", "post    post"), ("code", "400")]
+                    .iter()
+                    .map(pair_to_string)
+                    .collect()
+            )),
+            ..Default::default()
+        }
+        .name_with_labels(),
+    );
 }
 
 fn parse_bucket(s: &str, label: &str) -> Option<f64> {
@@ -1003,16 +1050,15 @@ pub struct Filter {
     pub labels: Option<HashMap<String, String>>,
 }
 
-/// Returns all metrics that evaluate to "true" for the filter rule.
-/// The matching is "OR", not "AND".
+/// Returns all metrics that evaluate to "true" based on the rule.
 /// If no filter has a label specified, it uses RegexSet for all regexes.
 /// TODO: optimize using more RegexSet without labels...
-pub fn match_all_by_filters(data: &[Metric], rules: Vec<Filter>) -> io::Result<Vec<&Metric>> {
+pub fn match_all_by_rules(data: &[Metric], rules: Rules) -> io::Result<Vec<&Metric>> {
     // compile regexes in advance
     // so we don't compile multiple times for each iteration
-    let mut regexes: Vec<Regex> = Vec::with_capacity(rules.len());
+    let mut regexes: Vec<Regex> = Vec::with_capacity(rules.filters.len());
     let mut labels_exist = false;
-    for r in rules.iter() {
+    for r in rules.filters.iter() {
         let regex = Regex::new(r.regex.as_str()).map_err(|e| {
             Error::new(
                 ErrorKind::Other,
@@ -1027,14 +1073,14 @@ pub fn match_all_by_filters(data: &[Metric], rules: Vec<Filter>) -> io::Result<V
     }
     log::debug!(
         "matching all metrics by {} rules (labels exist {})",
-        rules.len(),
+        rules.filters.len(),
         labels_exist
     );
 
     let found = if labels_exist {
         find_all(data, |s| {
             // iterate every rule in sequence until it finds something that matches
-            for (idx, r) in rules.iter().enumerate() {
+            for (idx, r) in rules.filters.iter().enumerate() {
                 let regex = &regexes[idx];
 
                 let regex_matched = regex.is_match(&s.metric);
@@ -1084,7 +1130,7 @@ pub fn match_all_by_filters(data: &[Metric], rules: Vec<Filter>) -> io::Result<V
             false
         })
     } else {
-        let regexes: Vec<String> = rules.iter().map(|f| f.regex.clone()).collect();
+        let regexes: Vec<String> = rules.filters.iter().map(|f| f.regex.clone()).collect();
         let reset = RegexSet::new(regexes).map_err(|e| {
             Error::new(
                 ErrorKind::Other,
@@ -1096,7 +1142,18 @@ pub fn match_all_by_filters(data: &[Metric], rules: Vec<Filter>) -> io::Result<V
     Ok(found)
 }
 
-pub fn load_filters(file_path: &str) -> io::Result<Vec<Filter>> {
+/// Represents metrics matching rules.
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
+#[serde(rename_all = "snake_case")]
+pub struct Rules {
+    /// The matching is "OR", not "AND".
+    /// TODO: support "AND" rule?
+    pub filters: Vec<Filter>,
+    // TODO: support simple maths (e.g., divide/multiply)
+}
+
+/// Loads the "Rules" from the file.
+pub fn load_rules(file_path: &str) -> io::Result<Rules> {
     log::info!("loading filters from {}", file_path);
 
     if !Path::new(file_path).exists() {
@@ -1137,9 +1194,9 @@ fn test_match_all_by_rules() {
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
     assert_eq!(s.metrics.len(), 2127);
 
-    let filters = load_filters("artifacts/avalanchego.rules.yaml").unwrap();
+    let rules = load_rules("artifacts/avalanchego.rules.yaml").unwrap();
     assert_eq!(
-        match_all_by_filters(&s.metrics, filters).unwrap(),
+        match_all_by_rules(&s.metrics, rules).unwrap(),
         vec![
             &Metric {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_blks_accepted_count"
