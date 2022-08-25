@@ -1004,6 +1004,7 @@ pub struct Filter {
 /// Returns all metrics that evaluate to "true" for the filter rule.
 /// The matching is "OR", not "AND".
 /// If no filter has a label specified, it uses RegexSet for all regexes.
+/// TODO: optimize using more RegexSet without labels...
 pub fn match_all_by_filters(data: &[Metric], rules: Vec<Filter>) -> io::Result<Vec<&Metric>> {
     // compile regexes in advance
     // so we don't compile multiple times for each iteration
