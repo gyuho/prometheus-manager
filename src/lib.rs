@@ -1,6 +1,6 @@
 use std::{
     collections::HashMap,
-    io::{self, BufRead, BufReader, Error},
+    io::{self, BufRead, BufReader, Error, ErrorKind},
     ops::Deref,
     str::FromStr,
     string::String,
@@ -9,6 +9,7 @@ use std::{
 use chrono::{DateTime, TimeZone, Utc};
 use lazy_static::lazy_static;
 use regex::{Regex, RegexSet};
+use serde::{Deserialize, Serialize};
 
 // ref. https://github.com/cmars/prometheus-scrape/blob/master/src/lib.rs
 // ref. https://github.com/ccakes/prometheus-parse-rs/blob/master/src/lib.rs
@@ -485,47 +486,9 @@ where
     &NOT_FOUND_METRIC
 }
 
-/// Returns all metrics that evaluate to "true" for the function.
-pub fn find_all<'a, F>(data: &'a [Metric], f: F) -> Vec<&'a Metric>
-where
-    for<'r> F: FnMut(&'r &'a Metric) -> bool,
-{
-    let mut metrics: Vec<&'a Metric> = Vec::new();
-
-    let mut iter = data.iter().filter(f);
-    loop {
-        let metric = iter.next();
-        if let Some(v) = metric {
-            metrics.push(v);
-            continue;
-        }
-        break;
-    }
-
-    metrics
-}
-
-/// Returns all metrics that evaluate to "true" for the regex on the metrics name, not the label.
-/// If called in a loop, use "lazy_static" to ensure that regular expressions
-/// are compiled exactly once.
-/// ref. https://github.com/rust-lang/regex#usage-avoid-compiling-the-same-regex-in-a-loop
-pub fn match_name_all(data: &[Metric], re: Regex) -> Vec<&Metric> {
-    log::debug!("matching metrics name by regex {}", re);
-    find_all(data, |s| re.is_match(s.metric.as_str()))
-}
-
-/// Returns all metrics that evaluate to "true" for the regex set on the metrics name, not the label.
-/// If called in a loop, use "lazy_static" to ensure that regular expressions
-/// are compiled exactly once.
-/// ref. https://github.com/rust-lang/regex#usage-avoid-compiling-the-same-regex-in-a-loop
-pub fn match_name_set_all(data: &[Metric], rset: RegexSet) -> Vec<&Metric> {
-    log::debug!("matching metrics name by regex set {:?}", rset);
-    find_all(data, |s| rset.is_match(s.metric.as_str()))
-}
-
-/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_parse_find_first --exact --show-output
+/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_find_first --exact --show-output
 #[test]
-fn test_parse_find_first() {
+fn test_find_first() {
     let _ = env_logger::builder()
         .filter_level(log::LevelFilter::Debug)
         .is_test(true)
@@ -659,9 +622,29 @@ avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum 4.5043750
     );
 }
 
-/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_parse_find_all --exact --show-output
+/// Returns all metrics that evaluate to "true" for the function.
+pub fn find_all<'a, F>(data: &'a [Metric], f: F) -> Vec<&'a Metric>
+where
+    for<'r> F: FnMut(&'r &'a Metric) -> bool,
+{
+    let mut metrics: Vec<&'a Metric> = Vec::new();
+
+    let mut iter = data.iter().filter(f);
+    loop {
+        let metric = iter.next();
+        if let Some(v) = metric {
+            metrics.push(v);
+            continue;
+        }
+        break;
+    }
+
+    metrics
+}
+
+/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_find_all --exact --show-output
 #[test]
-fn test_parse_find_all() {
+fn test_find_all() {
     use rust_embed::RustEmbed;
 
     let _ = env_logger::builder()
@@ -701,9 +684,18 @@ fn test_parse_find_all() {
     );
 }
 
-/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_parse_match_all --exact --show-output
+/// Returns all metrics that evaluate to "true" for the regex on the metrics name, not the label.
+/// If called in a loop, use "lazy_static" to ensure that regular expressions
+/// are compiled exactly once.
+/// ref. https://github.com/rust-lang/regex#usage-avoid-compiling-the-same-regex-in-a-loop
+pub fn match_all_by_regex(data: &[Metric], re: Regex) -> Vec<&Metric> {
+    log::debug!("matching all metrics by regex {} on the name", re);
+    find_all(data, |s| re.is_match(s.metric.as_str()))
+}
+
+/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_match_all_by_regex --exact --show-output
 #[test]
-fn test_parse_match_all() {
+fn test_match_all_by_regex() {
     use rust_embed::RustEmbed;
 
     let _ = env_logger::builder()
@@ -724,7 +716,7 @@ fn test_parse_match_all() {
 
     let re = Regex::new(r"^avalanche_(([0-9a-zA-Z]+)+){3,}_db_batch_put_size[\s\S]*$").unwrap();
     assert_eq!(
-        match_name_all(&s.metrics, re),
+        match_all_by_regex(&s.metrics, re),
         vec![
             &Metric {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_put_size_count"
@@ -742,9 +734,18 @@ fn test_parse_match_all() {
     );
 }
 
-/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_parse_match_set_all --exact --show-output
+/// Returns all metrics that evaluate to "true" for the regex set on the metrics name, not the label.
+/// If called in a loop, use "lazy_static" to ensure that regular expressions
+/// are compiled exactly once.
+/// ref. https://github.com/rust-lang/regex#usage-avoid-compiling-the-same-regex-in-a-loop
+pub fn match_all_by_regex_set(data: &[Metric], rset: RegexSet) -> Vec<&Metric> {
+    log::debug!("matching all metrics by regex set {:?} on the name", rset);
+    find_all(data, |s| rset.is_match(s.metric.as_str()))
+}
+
+/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_match_all_by_regex_set --exact --show-output
 #[test]
-fn test_parse_match_set_all() {
+fn test_match_all_by_regex_set() {
     use rust_embed::RustEmbed;
 
     let _ = env_logger::builder()
@@ -786,7 +787,7 @@ fn test_parse_match_set_all() {
 
     let rset = RegexSet::new(REGEXES.to_vec()).unwrap();
     assert_eq!(
-        match_name_set_all(&s.metrics, rset),
+        match_all_by_regex_set(&s.metrics, rset),
         vec![
             &Metric {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_blks_accepted_count"
@@ -990,41 +991,113 @@ fn test_parse_match_set_all() {
     );
 }
 
-/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_load_regexes --exact --show-output
-#[test]
-fn test_load_regexes() {
-    use std::{fs::File, io::ErrorKind, path::Path};
+/// Represents the metric filter rule.
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
+#[serde(rename_all = "snake_case")]
+pub struct Filter {
+    pub regex: String,
 
-    use rust_embed::RustEmbed;
-    use serde::{Deserialize, Serialize};
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub labels: Option<HashMap<String, String>>,
+}
 
-    #[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
-    #[serde(rename_all = "snake_case")]
-    struct Regexes {
-        pub expressions: Vec<String>,
-    }
+/// Returns all metrics that evaluate to "true" for the filter rule.
+/// The matching is "OR", not "AND".
+/// If no filter has a label specified, it uses RegexSet for all regexes.
+pub fn match_all_by_filters(data: &[Metric], rules: Vec<Filter>) -> io::Result<Vec<&Metric>> {
+    // compile regexes in advance
+    // so we don't compile multiple times for each iteration
+    let mut regexes: Vec<Regex> = Vec::with_capacity(rules.len());
+    let mut labels_exist = false;
+    for r in rules.iter() {
+        let regex = Regex::new(r.regex.as_str()).map_err(|e| {
+            Error::new(
+                ErrorKind::Other,
+                format!("failed to create regex {} ({})", r.regex, e),
+            )
+        })?;
+        regexes.push(regex);
 
-    impl Regexes {
-        fn load(file_path: &str) -> io::Result<Self> {
-            log::info!("loading regexes from {}", file_path);
-
-            if !Path::new(file_path).exists() {
-                return Err(Error::new(
-                    ErrorKind::NotFound,
-                    format!("file {} does not exists", file_path),
-                ));
-            }
-
-            let f = File::open(&file_path).map_err(|e| {
-                Error::new(
-                    ErrorKind::Other,
-                    format!("failed to open {} ({})", file_path, e),
-                )
-            })?;
-            serde_yaml::from_reader(f)
-                .map_err(|e| Error::new(ErrorKind::InvalidInput, format!("invalid YAML: {}", e)))
+        if r.labels.is_some() {
+            labels_exist = true;
         }
     }
+    log::debug!(
+        "matching all metrics by {} rules (labels exist {})",
+        rules.len(),
+        labels_exist
+    );
+
+    let found = if labels_exist {
+        find_all(data, |s| {
+            // iterate every rule in sequence until it finds something that matches
+            for (idx, r) in rules.iter().enumerate() {
+                let regex = &regexes[idx];
+
+                let regex_matched = regex.is_match(&s.metric);
+                if !regex_matched {
+                    // regex does not match, so no need to check further with labels
+                    // retry with next rule
+                    continue;
+                }
+
+                let matched = if let Some(label_rules) = &r.labels {
+                    // regex matches but labels exist, so need more label checks
+                    let mut label_rules_matched = true;
+
+                    // check against the incoming metric labels
+                    if let Some(current_labels) = &s.labels {
+                        for (k, v) in label_rules.iter() {
+                            if let Some(found_value) = current_labels.get(k) {
+                                if !found_value.eq(v) {
+                                    // label matches are exact
+                                    // even one missing label evaluates the whole check to be false
+                                    label_rules_matched = false;
+                                    break;
+                                }
+                                continue;
+                            }
+
+                            // expected label is not found in this metric, so no match
+                            // no need to check other labels
+                            label_rules_matched = false;
+                            break;
+                        }
+                    } else {
+                        // the current metric has no label
+                        label_rules_matched = false;
+                    }
+
+                    label_rules_matched
+                } else {
+                    // regex matches and this rule does not have any label
+                    true
+                };
+                if matched {
+                    // this rule matches, so no need to continue on the next rule
+                    return true;
+                }
+            }
+            false
+        })
+    } else {
+        let regexes: Vec<String> = rules.iter().map(|f| f.regex.clone()).collect();
+        let reset = RegexSet::new(regexes).map_err(|e| {
+            Error::new(
+                ErrorKind::Other,
+                format!("failed to create regex set {:?} ({})", rules, e),
+            )
+        })?;
+        match_all_by_regex_set(data, reset)
+    };
+    Ok(found)
+}
+
+/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_match_all_by_rules --exact --show-output
+#[test]
+fn test_match_all_by_rules() {
+    use rust_embed::RustEmbed;
+    use std::{fs::File, path::Path};
 
     let _ = env_logger::builder()
         .filter_level(log::LevelFilter::Debug)
@@ -1042,12 +1115,29 @@ fn test_load_regexes() {
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
     assert_eq!(s.metrics.len(), 2127);
 
-    let regexes = Regexes::load("artifacts/regexes.yaml").unwrap();
-    println!("{:?}", regexes.expressions);
+    fn load_filters(file_path: &str) -> io::Result<Vec<Filter>> {
+        log::info!("loading rules from {}", file_path);
 
-    let rset = RegexSet::new(regexes.expressions).unwrap();
+        if !Path::new(file_path).exists() {
+            return Err(Error::new(
+                ErrorKind::NotFound,
+                format!("file {} does not exists", file_path),
+            ));
+        }
+
+        let f = File::open(&file_path).map_err(|e| {
+            Error::new(
+                ErrorKind::Other,
+                format!("failed to open {} ({})", file_path, e),
+            )
+        })?;
+        serde_yaml::from_reader(f)
+            .map_err(|e| Error::new(ErrorKind::InvalidInput, format!("invalid YAML: {}", e)))
+    }
+
+    let filters = load_filters("artifacts/avalanchego.rules.yaml").unwrap();
     assert_eq!(
-        match_name_set_all(&s.metrics, rset),
+        match_all_by_filters(&s.metrics, filters).unwrap(),
         vec![
             &Metric {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_blks_accepted_count"
@@ -1065,6 +1155,12 @@ fn test_load_regexes() {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_blks_built"
                     .to_string(),
                 value: Value::Counter(4205f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_blks_processing"
+                    .to_string(),
+                value: Value::Gauge(0f64),
                 ..Default::default()
             },
             &Metric {
@@ -1092,9 +1188,87 @@ fn test_load_regexes() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_write_count"
+                    .to_string(),
+                value: Value::Counter(259476f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_write_sum"
+                    .to_string(),
+                value: Value::Gauge(2.8494818524e+10f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_compact_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_compact_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_delete_count"
+                    .to_string(),
+                value: Value::Counter(4f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_delete_sum"
+                    .to_string(),
+                value: Value::Gauge(66771f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_get_count"
+                    .to_string(),
+                value: Value::Counter(5.703759e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_get_sum"
+                    .to_string(),
+                value: Value::Gauge(3.5932638264e+11f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_put_count"
+                    .to_string(),
+                value: Value::Counter(1309f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_put_sum"
+                    .to_string(),
+                value: Value::Gauge(5.6261023e+07f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_get_accepted_count"
+                    .to_string(),
+                value: Value::Counter(10f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_get_accepted_sum"
+                    .to_string(),
+                value: Value::Gauge(132034f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_last_accepted_height"
                     .to_string(),
                 value: Value::Gauge(43240f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_polls_successful"
+                    .to_string(),
+                value: Value::Counter(649334f64),
                 ..Default::default()
             },
             &Metric {
@@ -1116,6 +1290,238 @@ fn test_load_regexes() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_handled_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_code", "OK"), ("grpc_method", "Delete"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(4f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_handled_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_code", "OK"), ("grpc_method", "Get"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(5.578128e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_handled_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_code", "OK"), ("grpc_method", "Has"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(4209f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_handled_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_code", "OK"), ("grpc_method", "HealthCheck"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(12879f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_handled_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_code", "OK"), ("grpc_method", "IteratorNext"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(3f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_handled_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_code", "OK"), ("grpc_method", "IteratorRelease"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(2f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_handled_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_code", "OK"), ("grpc_method", "NewIteratorWithStartAndPrefix"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(2f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_handled_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_code", "OK"), ("grpc_method", "Put"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(1309f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_handled_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_code", "OK"), ("grpc_method", "SendAppGossip"), ("grpc_service", "appsender.AppSender"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(257127f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_handled_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_code", "OK"), ("grpc_method", "WriteBatch"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(259475f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_started_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_method", "Delete"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(4f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_started_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_method", "Get"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(5.578128e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_started_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_method", "Has"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(4209f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_started_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_method", "HealthCheck"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(12879f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_started_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_method", "IteratorNext"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(3f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_started_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_method", "IteratorRelease"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(2f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_started_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_method", "NewIteratorWithStartAndPrefix"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(2f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_started_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_method", "Put"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(1309f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_started_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_method", "SendAppGossip"), ("grpc_service", "appsender.AppSender"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(257127f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_grpc_client_started_total".to_string(),
+                labels: Some(Labels(
+                    [("grpc_method", "WriteBatch"), ("grpc_service", "rpcdb.Database"), ("grpc_type", "unary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(259475f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_metervm_parse_block_count"
+                    .to_string(),
+                value: Value::Counter(1.121427e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_metervm_parse_block_sum"
+                    .to_string(),
+                value: Value::Gauge(5.82743213583e+11f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_C_benchlist_benched_num"
                     .to_string(),
                 value: Value::Gauge(0f64),
@@ -1134,21 +1540,99 @@ fn test_load_regexes() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_C_blks_built"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_blks_processing"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_blks_rejected_count"
+                    .to_string(),
+                value: Value::Counter(3f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_blks_rejected_sum"
+                    .to_string(),
+                value: Value::Gauge(1.8306179e+07f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_db_batch_put_count"
+                    .to_string(),
+                value: Value::Counter(659f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_db_batch_put_sum"
+                    .to_string(),
+                value: Value::Gauge(450756f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_db_batch_write_count"
+                    .to_string(),
+                value: Value::Counter(176f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_db_batch_write_sum"
+                    .to_string(),
+                value: Value::Gauge(2.894071e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_db_compact_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_db_compact_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_db_delete_count"
+                    .to_string(),
+                value: Value::Counter(2f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_db_delete_sum"
+                    .to_string(),
+                value: Value::Gauge(11070f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_C_db_get_count"
                     .to_string(),
                 value: Value::Counter(37607f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_C_db_read_size_sum"
+                metric: "avalanche_C_db_get_sum"
                     .to_string(),
-                value: Value::Gauge(2.689728e+06f64),
+                value: Value::Gauge(1.22077894e+09f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_C_db_write_size_sum"
+                metric: "avalanche_C_db_put_count"
                     .to_string(),
-                value: Value::Gauge(396119f64),
+                value: Value::Counter(1290f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_db_put_sum"
+                    .to_string(),
+                value: Value::Gauge(3.2048842e+07f64),
                 ..Default::default()
             },
             &Metric {
@@ -1161,6 +1645,18 @@ fn test_load_regexes() {
                 metric: "avalanche_C_polls_successful"
                     .to_string(),
                 value: Value::Counter(420f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_vm_metervm_parse_block_count"
+                    .to_string(),
+                value: Value::Counter(348187f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_vm_metervm_parse_block_sum"
+                    .to_string(),
+                value: Value::Gauge(2.364194114e+09f64),
                 ..Default::default()
             },
             &Metric {
@@ -1182,21 +1678,99 @@ fn test_load_regexes() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_P_blks_built"
+                    .to_string(),
+                value: Value::Counter(3f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_blks_processing"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_blks_rejected_count"
+                    .to_string(),
+                value: Value::Counter(21f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_blks_rejected_sum"
+                    .to_string(),
+                value: Value::Gauge(5.25170283e+08f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_db_batch_put_count"
+                    .to_string(),
+                value: Value::Counter(322f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_db_batch_put_sum"
+                    .to_string(),
+                value: Value::Gauge(116272f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_db_batch_write_count"
+                    .to_string(),
+                value: Value::Counter(95f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_db_batch_write_sum"
+                    .to_string(),
+                value: Value::Gauge(1.371173e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_db_compact_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_db_compact_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_db_delete_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_db_delete_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_P_db_get_count"
                     .to_string(),
                 value: Value::Counter(212f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_P_db_read_size_sum"
+                metric: "avalanche_P_db_get_sum"
                     .to_string(),
-                value: Value::Gauge(30726f64),
+                value: Value::Gauge(1.139713e+06f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_P_db_write_size_sum"
+                metric: "avalanche_P_db_put_count"
                     .to_string(),
-                value: Value::Gauge(78865f64),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_db_put_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
                 ..Default::default()
             },
             &Metric {
@@ -1212,7 +1786,67 @@ fn test_load_regexes() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_P_vm_metervm_parse_block_count"
+                    .to_string(),
+                value: Value::Counter(348418f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_vm_metervm_parse_block_sum"
+                    .to_string(),
+                value: Value::Gauge(5.5101287211e+10f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_X_benchlist_benched_num"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_db_batch_put_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_db_batch_put_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_db_batch_write_count"
+                    .to_string(),
+                value: Value::Counter(4f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_db_batch_write_sum"
+                    .to_string(),
+                value: Value::Gauge(2070f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_db_compact_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_db_compact_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_db_delete_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_db_delete_sum"
                     .to_string(),
                 value: Value::Gauge(0f64),
                 ..Default::default()
@@ -1224,13 +1858,19 @@ fn test_load_regexes() {
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_db_read_size_sum"
+                metric: "avalanche_X_db_get_sum"
                     .to_string(),
-                value: Value::Gauge(507f64),
+                value: Value::Gauge(38260f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_db_write_size_sum"
+                metric: "avalanche_X_db_put_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_db_put_sum"
                     .to_string(),
                 value: Value::Gauge(0f64),
                 ..Default::default()
@@ -1245,6 +1885,373 @@ fn test_load_regexes() {
                 metric: "avalanche_X_polls_successful"
                     .to_string(),
                 value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_whitelist_tx_accepted_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_whitelist_tx_accepted_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_whitelist_tx_polls_accepted_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_whitelist_tx_polls_accepted_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_whitelist_tx_polls_rejected_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_whitelist_tx_polls_rejected_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_whitelist_tx_processing"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_whitelist_tx_rejected_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_whitelist_tx_rejected_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_whitelist_vtx_issue_failure"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_whitelist_vtx_issue_success"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_db_batch_put_count"
+                    .to_string(),
+                value: Value::Counter(7.470929e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_db_batch_put_sum"
+                    .to_string(),
+                value: Value::Gauge(4.234592257e+09f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_db_batch_write_count"
+                    .to_string(),
+                value: Value::Counter(259751f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_db_batch_write_sum"
+                    .to_string(),
+                value: Value::Gauge(2.8387298672e+10f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_db_compact_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_db_compact_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_db_delete_count"
+                    .to_string(),
+                value: Value::Counter(6f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_db_delete_sum"
+                    .to_string(),
+                value: Value::Gauge(75452f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_db_get_count"
+                    .to_string(),
+                value: Value::Counter(5.741585e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_db_get_sum"
+                    .to_string(),
+                value: Value::Gauge(3.57862202207e+11f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_db_put_count"
+                    .to_string(),
+                value: Value::Counter(2599f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_db_put_sum"
+                    .to_string(),
+                value: Value::Gauge(8.6561039e+07f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_inbound_conn_throttler_allowed"
+                    .to_string(),
+                value: Value::Counter(19f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_inbound_conn_throttler_rate_limited"
+                    .to_string(),
+                value: Value::Counter(11f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_node_uptime_rewarding_stake"
+                    .to_string(),
+                value: Value::Gauge(100f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_node_uptime_weighted_average"
+                    .to_string(),
+                value: Value::Gauge(99.19999000049998f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_peerlist_failed"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_peerlist_received"
+                    .to_string(),
+                value: Value::Counter(57968f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_peerlist_sent"
+                    .to_string(),
+                value: Value::Counter(57975f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_peers"
+                    .to_string(),
+                value: Value::Gauge(9f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_peers_subnet"
+                    .to_string(),
+                labels: Some(Labels(
+                        [("subnetID", "2At5uFe2kDiYsHziSqJeebizvF9zQbH4m9mPQbKdMKhEWJj5AW")]
+                            .iter()
+                            .map(pair_to_string)
+                            .collect()
+                    )),
+                value: Value::Gauge(9f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_ping_failed"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_ping_received"
+                    .to_string(),
+                value: Value::Counter(154521f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_ping_sent"
+                    .to_string(),
+                value: Value::Counter(154530f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_pong_failed"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_pong_received"
+                    .to_string(),
+                value: Value::Counter(154521f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_pong_sent"
+                    .to_string(),
+                value: Value::Counter(154521f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_pull_query_failed"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_pull_query_received"
+                    .to_string(),
+                value: Value::Counter(5.740569e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_pull_query_sent"
+                    .to_string(),
+                value: Value::Counter(5.72831e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_push_query_failed"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_push_query_received"
+                    .to_string(),
+                value: Value::Counter(342488f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_push_query_sent"
+                    .to_string(),
+                value: Value::Counter(342523f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_put_failed"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_put_received"
+                    .to_string(),
+                value: Value::Counter(1.437452e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_put_sent"
+                    .to_string(),
+                value: Value::Counter(1.437383e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_throttler_outbound_acquire_failures"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_throttler_outbound_acquire_successes"
+                    .to_string(),
+                value: Value::Counter(1.627736e+07f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_times_connected"
+                    .to_string(),
+                value: Value::Counter(24f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_times_disconnected"
+                    .to_string(),
+                value: Value::Counter(15f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_version_failed"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_version_received"
+                    .to_string(),
+                value: Value::Counter(24f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_version_sent"
+                    .to_string(),
+                value: Value::Counter(24f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_process_max_fds"
+                    .to_string(),
+                value: Value::Gauge(32768f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_process_open_fds"
+                    .to_string(),
+                value: Value::Gauge(463f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_process_resident_memory_bytes"
+                    .to_string(),
+                value: Value::Gauge(3.33867008e+09f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_process_virtual_memory_bytes"
+                    .to_string(),
+                value: Value::Gauge(6.609301504e+09f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_eth_rpc_duration_all"
+                    .to_string(),
+                value: Value::Summary(vec![
+                    SummaryCount{quantile: 0.5, count: 327057.0f64},
+                    SummaryCount{quantile: 0.75, count: 382043.0f64},
+                    SummaryCount{quantile: 0.95, count: 2659645.649999993f64},
+                    SummaryCount{quantile: 0.99, count: 198345217.87000003f64},
+                    SummaryCount{quantile: 0.999, count: 200404035.783f64},
+                    SummaryCount{quantile: 0.9999, count: 200408762.0f64},
+                    ]),
                 ..Default::default()
             },
         ]
