@@ -1,7 +1,9 @@
 use std::{
     collections::HashMap,
+    fs::File,
     io::{self, BufRead, BufReader, Error, ErrorKind},
     ops::Deref,
+    path::Path,
     str::FromStr,
     string::String,
 };
@@ -1094,11 +1096,30 @@ pub fn match_all_by_filters(data: &[Metric], rules: Vec<Filter>) -> io::Result<V
     Ok(found)
 }
 
+pub fn load_filters(file_path: &str) -> io::Result<Vec<Filter>> {
+    log::info!("loading filters from {}", file_path);
+
+    if !Path::new(file_path).exists() {
+        return Err(Error::new(
+            ErrorKind::NotFound,
+            format!("file {} does not exists", file_path),
+        ));
+    }
+
+    let f = File::open(&file_path).map_err(|e| {
+        Error::new(
+            ErrorKind::Other,
+            format!("failed to open {} ({})", file_path, e),
+        )
+    })?;
+    serde_yaml::from_reader(f)
+        .map_err(|e| Error::new(ErrorKind::InvalidInput, format!("invalid YAML: {}", e)))
+}
+
 /// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_match_all_by_rules --exact --show-output
 #[test]
 fn test_match_all_by_rules() {
     use rust_embed::RustEmbed;
-    use std::{fs::File, path::Path};
 
     let _ = env_logger::builder()
         .filter_level(log::LevelFilter::Debug)
@@ -1115,26 +1136,6 @@ fn test_match_all_by_rules() {
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
     assert_eq!(s.metrics.len(), 2127);
-
-    fn load_filters(file_path: &str) -> io::Result<Vec<Filter>> {
-        log::info!("loading rules from {}", file_path);
-
-        if !Path::new(file_path).exists() {
-            return Err(Error::new(
-                ErrorKind::NotFound,
-                format!("file {} does not exists", file_path),
-            ));
-        }
-
-        let f = File::open(&file_path).map_err(|e| {
-            Error::new(
-                ErrorKind::Other,
-                format!("failed to open {} ({})", file_path, e),
-            )
-        })?;
-        serde_yaml::from_reader(f)
-            .map_err(|e| Error::new(ErrorKind::InvalidInput, format!("invalid YAML: {}", e)))
-    }
 
     let filters = load_filters("artifacts/avalanchego.rules.yaml").unwrap();
     assert_eq!(
