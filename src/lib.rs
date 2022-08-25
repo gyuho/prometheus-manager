@@ -1,7 +1,7 @@
 use std::{
     collections::HashMap,
-    fs::File,
-    io::{self, BufRead, BufReader, Error, ErrorKind},
+    fs::{self, File},
+    io::{self, BufRead, BufReader, Error, ErrorKind, Write},
     ops::Deref,
     path::Path,
     str::FromStr,
@@ -1161,25 +1161,50 @@ pub struct Rules {
     // TODO: support simple maths (e.g., divide/multiply)
 }
 
-/// Loads the "Rules" from the file.
-pub fn load_rules(file_path: &str) -> io::Result<Rules> {
-    log::info!("loading rules from {}", file_path);
+impl Rules {
+    /// Loads the "Rules" from the file.
+    pub fn load(file_path: &str) -> io::Result<Rules> {
+        log::info!("loading Rules from {}", file_path);
 
-    if !Path::new(file_path).exists() {
-        return Err(Error::new(
-            ErrorKind::NotFound,
-            format!("file {} does not exists", file_path),
-        ));
+        if !Path::new(file_path).exists() {
+            return Err(Error::new(
+                ErrorKind::NotFound,
+                format!("file {} does not exists", file_path),
+            ));
+        }
+
+        let f = File::open(&file_path).map_err(|e| {
+            Error::new(
+                ErrorKind::Other,
+                format!("failed to open {} ({})", file_path, e),
+            )
+        })?;
+        serde_yaml::from_reader(f)
+            .map_err(|e| Error::new(ErrorKind::InvalidInput, format!("invalid YAML: {}", e)))
     }
 
-    let f = File::open(&file_path).map_err(|e| {
-        Error::new(
-            ErrorKind::Other,
-            format!("failed to open {} ({})", file_path, e),
-        )
-    })?;
-    serde_yaml::from_reader(f)
-        .map_err(|e| Error::new(ErrorKind::InvalidInput, format!("invalid YAML: {}", e)))
+    /// Syncs the "Rules" to the file.
+    pub fn sync(&self, file_path: &str) -> io::Result<()> {
+        log::info!("syncing Rules to '{}'", file_path);
+        let path = Path::new(file_path);
+        let parent_dir = path.parent().expect("unexpected None file path parent");
+        fs::create_dir_all(parent_dir)?;
+
+        let ret = serde_yaml::to_string(self);
+        let d = match ret {
+            Ok(d) => d,
+            Err(e) => {
+                return Err(Error::new(
+                    ErrorKind::Other,
+                    format!("failed to serialize Node to YAML {}", e),
+                ));
+            }
+        };
+        let mut f = File::create(file_path)?;
+        f.write_all(d.as_bytes())?;
+
+        Ok(())
+    }
 }
 
 /// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_match_all_by_rules --exact --show-output
@@ -1203,7 +1228,7 @@ fn test_match_all_by_rules() {
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
     assert_eq!(s.metrics.len(), 2127);
 
-    let rules = load_rules("artifacts/avalanchego.rules.yaml").unwrap();
+    let rules = Rules::load("artifacts/avalanchego.rules.yaml").unwrap();
     assert_eq!(
         match_all_by_rules(&s.metrics, rules).unwrap(),
         vec![
