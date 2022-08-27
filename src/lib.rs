@@ -1049,7 +1049,68 @@ fn test_match_all_by_regex_set() {
     );
 }
 
-/// Represents the metric filter rule.
+impl Rules {
+    /// Loads the "Rules" from the file.
+    pub fn load(file_path: &str) -> io::Result<Rules> {
+        log::info!("loading Rules from {}", file_path);
+
+        if !Path::new(file_path).exists() {
+            return Err(Error::new(
+                ErrorKind::NotFound,
+                format!("file {} does not exists", file_path),
+            ));
+        }
+
+        let f = File::open(&file_path).map_err(|e| {
+            Error::new(
+                ErrorKind::Other,
+                format!("failed to open {} ({})", file_path, e),
+            )
+        })?;
+        serde_yaml::from_reader(f)
+            .map_err(|e| Error::new(ErrorKind::InvalidInput, format!("invalid YAML: {}", e)))
+    }
+
+    /// Syncs the "Rules" to the file.
+    pub fn sync(&self, file_path: &str) -> io::Result<()> {
+        log::info!("syncing Rules to '{}'", file_path);
+        let path = Path::new(file_path);
+        let parent_dir = path.parent().expect("unexpected None file path parent");
+        fs::create_dir_all(parent_dir)?;
+
+        let ret = serde_yaml::to_string(self);
+        let d = match ret {
+            Ok(d) => d,
+            Err(e) => {
+                return Err(Error::new(
+                    ErrorKind::Other,
+                    format!("failed to serialize Node to YAML {}", e),
+                ));
+            }
+        };
+        let mut f = File::create(file_path)?;
+        f.write_all(d.as_bytes())?;
+
+        Ok(())
+    }
+}
+
+/// Represents metrics matching rules.
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
+#[serde(rename_all = "snake_case")]
+pub struct Rules {
+    /// The matching rule is "OR", not "AND".
+    /// Returns all metrics that at least satisfy one rule.
+    pub filters: Vec<Filter>,
+    //
+    // TODO:
+    // Simple division math rule on the matched metrics.
+    // Metric name supports regex but expects exact match except the chain name.
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub divides: Option<Vec<Divide>>,
+}
+
+/// Represents the metric filter.
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct Filter {
@@ -1059,10 +1120,11 @@ pub struct Filter {
     pub labels: Option<HashMap<String, String>>,
 }
 
-/// Returns all metrics that evaluate to "true" based on the rule.
+/// Returns all metrics that evaluate to "true" based on the rules.
 /// If no filter has a label specified, it uses RegexSet for all regexes.
 /// TODO: optimize using more RegexSet without labels...
-pub fn match_all_by_rules(data: &[Metric], rules: Rules) -> io::Result<Vec<&Metric>> {
+/// TODO: Support delta-based divides.
+pub fn apply_rules(data: &[Metric], rules: Rules) -> io::Result<Vec<&Metric>> {
     // compile regexes in advance
     // so we don't compile multiple times for each iteration
     let mut regexes: Vec<Regex> = Vec::with_capacity(rules.filters.len());
@@ -1143,7 +1205,10 @@ pub fn match_all_by_rules(data: &[Metric], rules: Rules) -> io::Result<Vec<&Metr
         let reset = RegexSet::new(regexes).map_err(|e| {
             Error::new(
                 ErrorKind::Other,
-                format!("failed to create regex set {:?} ({})", rules, e),
+                format!(
+                    "failed to create regex set for the rules {:?} ({})",
+                    rules, e
+                ),
             )
         })?;
         match_all_by_regex_set(data, reset)
@@ -1151,65 +1216,9 @@ pub fn match_all_by_rules(data: &[Metric], rules: Rules) -> io::Result<Vec<&Metr
     Ok(found)
 }
 
-/// Represents metrics matching rules.
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
-#[serde(rename_all = "snake_case")]
-pub struct Rules {
-    /// The matching is "OR", not "AND".
-    /// TODO: support "AND" rule?
-    pub filters: Vec<Filter>,
-    // TODO: support simple maths (e.g., divide/multiply)
-}
-
-impl Rules {
-    /// Loads the "Rules" from the file.
-    pub fn load(file_path: &str) -> io::Result<Rules> {
-        log::info!("loading Rules from {}", file_path);
-
-        if !Path::new(file_path).exists() {
-            return Err(Error::new(
-                ErrorKind::NotFound,
-                format!("file {} does not exists", file_path),
-            ));
-        }
-
-        let f = File::open(&file_path).map_err(|e| {
-            Error::new(
-                ErrorKind::Other,
-                format!("failed to open {} ({})", file_path, e),
-            )
-        })?;
-        serde_yaml::from_reader(f)
-            .map_err(|e| Error::new(ErrorKind::InvalidInput, format!("invalid YAML: {}", e)))
-    }
-
-    /// Syncs the "Rules" to the file.
-    pub fn sync(&self, file_path: &str) -> io::Result<()> {
-        log::info!("syncing Rules to '{}'", file_path);
-        let path = Path::new(file_path);
-        let parent_dir = path.parent().expect("unexpected None file path parent");
-        fs::create_dir_all(parent_dir)?;
-
-        let ret = serde_yaml::to_string(self);
-        let d = match ret {
-            Ok(d) => d,
-            Err(e) => {
-                return Err(Error::new(
-                    ErrorKind::Other,
-                    format!("failed to serialize Node to YAML {}", e),
-                ));
-            }
-        };
-        let mut f = File::create(file_path)?;
-        f.write_all(d.as_bytes())?;
-
-        Ok(())
-    }
-}
-
-/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_match_all_by_rules --exact --show-output
+/// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_apply_rules --exact --show-output
 #[test]
-fn test_match_all_by_rules() {
+fn test_apply_rules() {
     use rust_embed::RustEmbed;
 
     let _ = env_logger::builder()
@@ -1229,7 +1238,7 @@ fn test_match_all_by_rules() {
     assert_eq!(s.metrics.len(), 2127);
 
     let rules = Rules::load("artifacts/avalanchego.rules.yaml").unwrap();
-    let matched = match_all_by_rules(&s.metrics, rules).unwrap();
+    let matched = apply_rules(&s.metrics, rules).unwrap();
 
     let mut cnt = 0;
     for (i, v ) in vec![
