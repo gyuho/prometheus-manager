@@ -1229,9 +1229,16 @@ fn test_match_all_by_rules() {
     assert_eq!(s.metrics.len(), 2127);
 
     let rules = Rules::load("artifacts/avalanchego.rules.yaml").unwrap();
-    assert_eq!(
-        match_all_by_rules(&s.metrics, rules).unwrap(),
-        vec![
+    let matched = match_all_by_rules(&s.metrics, rules).unwrap();
+
+    let mut cnt = 0;
+    for (i, v ) in vec![
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_benchlist_benched_num"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
             &Metric {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_blks_accepted_count"
                     .to_string(),
@@ -1341,6 +1348,18 @@ fn test_match_all_by_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_app_gossip_count"
+                    .to_string(),
+                value: Value::Counter(2.35194e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_app_gossip_sum"
+                    .to_string(),
+                value: Value::Gauge(1.429600925484e+12f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_get_accepted_count"
                     .to_string(),
                 value: Value::Counter(10f64),
@@ -1353,9 +1372,27 @@ fn test_match_all_by_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_gossip_request_count"
+                    .to_string(),
+                value: Value::Counter(38637f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_gossip_request_sum"
+                    .to_string(),
+                value: Value::Gauge(3.0502987481e+10f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_last_accepted_height"
                     .to_string(),
                 value: Value::Gauge(43240f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_polls_failed"
+                    .to_string(),
+                value: Value::Counter(5280f64),
                 ..Default::default()
             },
             &Metric {
@@ -1729,6 +1766,48 @@ fn test_match_all_by_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_C_handler_app_gossip_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_handler_app_gossip_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_handler_get_accepted_count"
+                    .to_string(),
+                value: Value::Counter(10f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_handler_get_accepted_sum"
+                    .to_string(),
+                value: Value::Gauge(151780f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_handler_gossip_request_count"
+                    .to_string(),
+                value: Value::Counter(38647f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_handler_gossip_request_sum"
+                    .to_string(),
+                value: Value::Gauge(7.478144226e+09f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_last_accepted_height"
+                    .to_string(),
+                value: Value::Gauge(27f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_C_polls_failed"
                     .to_string(),
                 value: Value::Counter(0f64),
@@ -1738,6 +1817,24 @@ fn test_match_all_by_rules() {
                 metric: "avalanche_C_polls_successful"
                     .to_string(),
                 value: Value::Counter(420f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_vm_eth_rpc_failure"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_vm_eth_rpc_requests"
+                    .to_string(),
+                value: Value::Gauge(32f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_vm_eth_rpc_success"
+                    .to_string(),
+                value: Value::Gauge(32f64),
                 ..Default::default()
             },
             &Metric {
@@ -1867,6 +1964,48 @@ fn test_match_all_by_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_P_handler_app_gossip_count"
+                    .to_string(),
+                value: Value::Counter(99f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_handler_app_gossip_sum"
+                    .to_string(),
+                value: Value::Gauge(4.151146e+07f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_handler_get_accepted_count"
+                    .to_string(),
+                value: Value::Counter(5f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_handler_get_accepted_sum"
+                    .to_string(),
+                value: Value::Gauge(341334f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_handler_gossip_request_count"
+                    .to_string(),
+                value: Value::Counter(38647f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_handler_gossip_request_sum"
+                    .to_string(),
+                value: Value::Gauge(1.6374368298e+10f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_last_accepted_height"
+                    .to_string(),
+                value: Value::Gauge(60f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_P_polls_failed"
                     .to_string(),
                 value: Value::Counter(7f64),
@@ -1966,6 +2105,42 @@ fn test_match_all_by_rules() {
                 metric: "avalanche_X_db_put_sum"
                     .to_string(),
                 value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_handler_app_gossip_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_handler_app_gossip_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_handler_get_accepted_count"
+                    .to_string(),
+                value: Value::Counter(10f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_handler_get_accepted_sum"
+                    .to_string(),
+                value: Value::Gauge(87161f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_handler_gossip_request_count"
+                    .to_string(),
+                value: Value::Counter(38647f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_handler_gossip_request_sum"
+                    .to_string(),
+                value: Value::Gauge(6.6360031e+07f64),
                 ..Default::default()
             },
             &Metric {
@@ -2347,8 +2522,12 @@ fn test_match_all_by_rules() {
                     ]),
                 ..Default::default()
             },
-        ]
-    );
+        ].iter().enumerate() {
+        assert_eq!(matched[i], v.clone());
+
+        cnt = i + 1;
+    };
+    assert_eq!(cnt, matched.len());
 }
 
 pub fn pair_to_string(pair: &(&str, &str)) -> (String, String) {
