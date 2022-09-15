@@ -1,3 +1,5 @@
+# periodically updated with latest avalanchego
+
 # HELP avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_app_request_failed_benched # of times a app_request request was not sent because the node was benched
 # TYPE avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_app_request_failed_benched counter
 avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_app_request_failed_benched 0
@@ -5949,3 +5951,23 @@ avalanche_resource_tracker_disk_writes 21.871920295921907
 # HELP avalanche_resource_tracker_processing_time Tracked processing time over all nodes. Value expected to be in [0, number of CPU cores], but can go higher due to IO bound processes and thread multiplexing
 # TYPE avalanche_resource_tracker_processing_time gauge
 avalanche_resource_tracker_processing_time 0.0008016858468440065
+
+
+# HELP avalanche_network_accept_failed Times this node failed to accept connection from a peer it had completed a handshake with
+# TYPE avalanche_network_accept_failed counter
+avalanche_network_accept_failed{error="temporary"} 0
+avalanche_network_accept_failed{error="timeout"} 0
+
+# HELP avalanche_network_proto_codec_push_query_compress_time_count # of observations of time (in ns) to compress push_query messages
+# TYPE avalanche_network_proto_codec_push_query_compress_time_count counter
+avalanche_network_proto_codec_push_query_compress_time_count 2012
+# HELP avalanche_network_proto_codec_push_query_compress_time_sum Sum of time (in ns) to compress push_query messages
+# TYPE avalanche_network_proto_codec_push_query_compress_time_sum gauge
+avalanche_network_proto_codec_push_query_compress_time_sum 9.8401986e+07
+# HELP avalanche_network_proto_codec_push_query_decompress_time_count # of observations of time (in ns) to decompress push_query messages
+# TYPE avalanche_network_proto_codec_push_query_decompress_time_count counter
+avalanche_network_proto_codec_push_query_decompress_time_count 2012
+# HELP avalanche_network_proto_codec_push_query_decompress_time_sum Sum of time (in ns) to decompress push_query messages
+# TYPE avalanche_network_proto_codec_push_query_decompress_time_sum gauge
+avalanche_network_proto_codec_push_query_decompress_time_sum 9.8401986e+07
+

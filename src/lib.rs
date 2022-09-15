@@ -715,11 +715,11 @@ fn test_find_all() {
     #[prefix = "artifacts/"]
     struct Asset;
 
-    let metrics_raw = Asset::get("artifacts/avalanchego.v1.7.17.metrics").unwrap();
+    let metrics_raw = Asset::get("artifacts/avalanchego.metrics").unwrap();
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2127);
+    assert_eq!(s.metrics.len(), 2133);
 
     assert_eq!(
         find_all(&s.metrics, |s| s.metric.contains(
@@ -766,11 +766,11 @@ fn test_match_all_by_regex() {
     #[prefix = "artifacts/"]
     struct Asset;
 
-    let metrics_raw = Asset::get("artifacts/avalanchego.v1.7.17.metrics").unwrap();
+    let metrics_raw = Asset::get("artifacts/avalanchego.metrics").unwrap();
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2127);
+    assert_eq!(s.metrics.len(), 2133);
 
     let re = Regex::new(r"^avalanche_(([0-9a-zA-Z]+)+){3,}_db_batch_put_size[\s\S]*$").unwrap();
     assert_eq!(
@@ -816,11 +816,11 @@ fn test_match_all_by_regex_set() {
     #[prefix = "artifacts/"]
     struct Asset;
 
-    let metrics_raw = Asset::get("artifacts/avalanchego.v1.7.17.metrics").unwrap();
+    let metrics_raw = Asset::get("artifacts/avalanchego.metrics").unwrap();
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2127);
+    assert_eq!(s.metrics.len(), 2133);
 
     lazy_static! {
         static ref REGEXES: Vec<String> = vec![
@@ -1231,11 +1231,11 @@ fn test_apply_rules() {
     #[prefix = "artifacts/"]
     struct Asset;
 
-    let metrics_raw = Asset::get("artifacts/avalanchego.v1.7.17.metrics").unwrap();
+    let metrics_raw = Asset::get("artifacts/avalanchego.metrics").unwrap();
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2127);
+    assert_eq!(s.metrics.len(), 2133);
 
     let rules = Rules::load("artifacts/avalanchego.rules.yaml").unwrap();
     let matched = apply_rules(&s.metrics, rules).unwrap();
@@ -2763,6 +2763,206 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_network_codec_accepted_state_summary_compress_time_count".to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_accepted_state_summary_compress_time_sum".to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_accepted_state_summary_decompress_time_count".to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_accepted_state_summary_decompress_time_sum".to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_ancestors_compress_time_count".to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_ancestors_compress_time_sum".to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_ancestors_decompress_time_count".to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_ancestors_decompress_time_sum".to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_app_gossip_compress_time_count".to_string(),
+                value: Value::Counter(257138f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_app_gossip_compress_time_sum".to_string(), 
+                value: Value::Gauge(1.33156939569e+11f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_app_gossip_decompress_time_count".to_string(), 
+                value: Value::Counter(2.352039e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_app_gossip_decompress_time_sum".to_string(), 
+                value: Value::Gauge(2.2997482905e+11f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_app_request_compress_time_count".to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_app_request_compress_time_sum".to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_app_request_decompress_time_count".to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_app_request_decompress_time_sum".to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_app_response_compress_time_count".to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_app_response_compress_time_sum".to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_app_response_decompress_time_count".to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_app_response_decompress_time_sum".to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_get_accepted_state_summary_compress_time_count".to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_get_accepted_state_summary_compress_time_sum".to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_get_accepted_state_summary_decompress_time_count".to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_get_accepted_state_summary_decompress_time_sum".to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_peerlist_compress_time_count".to_string(), 
+                value: Value::Counter(6463f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_peerlist_compress_time_sum".to_string(), 
+                value: Value::Gauge(1.601674227e+09f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_peerlist_decompress_time_count".to_string(), 
+                value: Value::Counter(57968f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_peerlist_decompress_time_sum".to_string(), 
+                value: Value::Gauge(4.688250786e+09f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_push_query_compress_time_count".to_string(), 
+                value: Value::Counter(43306f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_push_query_compress_time_sum".to_string(), 
+                value: Value::Gauge(1.03463977378e+11f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_push_query_decompress_time_count".to_string(), 
+                value: Value::Counter(342488f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_push_query_decompress_time_sum".to_string(), 
+                value: Value::Gauge(4.00810717995e+11f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_put_compress_time_count".to_string(), 
+                value: Value::Counter(163833f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_put_compress_time_sum".to_string(), 
+                value: Value::Gauge(1.54368659176e+11f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_put_decompress_time_count".to_string(), 
+                value: Value::Counter(1.437452e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_put_decompress_time_sum".to_string(), 
+                value: Value::Gauge(3.63660179076e+11f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_state_summary_frontier_compress_time_count".to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_state_summary_frontier_compress_time_sum".to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_codec_state_summary_frontier_decompress_time_count".to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                    metric: "avalanche_network_codec_state_summary_frontier_decompress_time_sum".to_string(),
+                    value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_network_inbound_conn_throttler_allowed"
                     .to_string(),
                 value: Value::Counter(19f64),
@@ -2988,6 +3188,48 @@ fn test_apply_rules() {
                 metric: "avalanche_requests_average_latency"
                     .to_string(),
                 value: Value::Gauge(754948.8775182138f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_accept_failed".to_string(),
+                labels: Some(Labels(
+                    [("error", "temporary")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_accept_failed".to_string(),
+                labels: Some(Labels(
+                    [("error", "timeout")]
+                        .iter()
+                        .map(pair_to_string)
+                        .collect()
+                )),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_proto_codec_push_query_compress_time_count".to_string(),
+                value: Value::Counter(2012f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_proto_codec_push_query_compress_time_sum".to_string(),
+                value: Value::Gauge(9.8401986e+07f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_proto_codec_push_query_decompress_time_count".to_string(),
+                value: Value::Counter(2012f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_proto_codec_push_query_decompress_time_sum".to_string(),
+                value: Value::Gauge(9.8401986e+07f64),
                 ..Default::default()
             },
             &Metric {
