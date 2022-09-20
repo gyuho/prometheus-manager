@@ -1315,6 +1315,18 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_blocked"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_blockers"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_batch_put_count"
                     .to_string(),
                 value: Value::Counter(7.469948e+06f64),
@@ -1435,18 +1447,6 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_chits_v2_count"
-                    .to_string(),
-                value: Value::Counter(0f64),
-                ..Default::default()
-            },
-            &Metric {
-                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_chits_v2_sum"
-                    .to_string(),
-                value: Value::Gauge(0f64),
-                ..Default::default()
-            },
-            &Metric {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_get_accepted_count"
                     .to_string(),
                 value: Value::Counter(10f64),
@@ -1456,6 +1456,30 @@ fn test_apply_rules() {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_get_accepted_sum"
                     .to_string(),
                 value: Value::Gauge(132034f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_get_ancestors_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_get_ancestors_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_get_count"
+                    .to_string(),
+                value: Value::Counter(4595f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_get_sum"
+                    .to_string(),
+                value: Value::Gauge(1.0502593836e+10f64),
                 ..Default::default()
             },
             &Metric {
@@ -1851,6 +1875,18 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_C_blocked"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_blockers"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_C_db_batch_put_count"
                     .to_string(),
                 value: Value::Counter(659f64),
@@ -1971,18 +2007,6 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_C_handler_chits_v2_count"
-                    .to_string(),
-                value: Value::Counter(0f64),
-                ..Default::default()
-            },
-            &Metric {
-                metric: "avalanche_C_handler_chits_v2_sum"
-                    .to_string(),
-                value: Value::Gauge(0f64),
-                ..Default::default()
-            },
-            &Metric {
                 metric: "avalanche_C_handler_get_accepted_count"
                     .to_string(),
                 value: Value::Counter(10f64),
@@ -1992,6 +2016,30 @@ fn test_apply_rules() {
                 metric: "avalanche_C_handler_get_accepted_sum"
                     .to_string(),
                 value: Value::Gauge(151780f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_handler_get_ancestors_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_handler_get_ancestors_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_handler_get_count"
+                    .to_string(),
+                value: Value::Counter(1f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_C_handler_get_sum"
+                    .to_string(),
+                value: Value::Gauge(105902f64),
                 ..Default::default()
             },
             &Metric {
@@ -2145,6 +2193,18 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_P_blocked"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_blockers"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_P_db_batch_put_count"
                     .to_string(),
                 value: Value::Counter(322f64),
@@ -2265,18 +2325,6 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_P_handler_chits_v2_count"
-                    .to_string(),
-                value: Value::Counter(0f64),
-                ..Default::default()
-            },
-            &Metric {
-                metric: "avalanche_P_handler_chits_v2_sum"
-                    .to_string(),
-                value: Value::Gauge(0f64),
-                ..Default::default()
-            },
-            &Metric {
                 metric: "avalanche_P_handler_get_accepted_count"
                     .to_string(),
                 value: Value::Counter(5f64),
@@ -2286,6 +2334,30 @@ fn test_apply_rules() {
                 metric: "avalanche_P_handler_get_accepted_sum"
                     .to_string(),
                 value: Value::Gauge(341334f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_handler_get_ancestors_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_handler_get_ancestors_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_handler_get_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_handler_get_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
                 ..Default::default()
             },
             &Metric {
@@ -2493,18 +2565,6 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_handler_chits_v2_count"
-                    .to_string(),
-                value: Value::Counter(0f64),
-                ..Default::default()
-            },
-            &Metric {
-                metric: "avalanche_X_handler_chits_v2_sum"
-                    .to_string(),
-                value: Value::Gauge(0f64),
-                ..Default::default()
-            },
-            &Metric {
                 metric: "avalanche_X_handler_get_accepted_count"
                     .to_string(),
                 value: Value::Counter(10f64),
@@ -2514,6 +2574,30 @@ fn test_apply_rules() {
                 metric: "avalanche_X_handler_get_accepted_sum"
                     .to_string(),
                 value: Value::Gauge(87161f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_handler_get_ancestors_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_handler_get_ancestors_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_handler_get_count"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_X_handler_get_sum"
+                    .to_string(),
+                value: Value::Gauge(0f64),
                 ..Default::default()
             },
             &Metric {
@@ -2963,6 +3047,66 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_network_get_ancestors_failed"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_get_ancestors_received"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_get_ancestors_received_bytes"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_get_ancestors_sent"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_get_ancestors_sent_bytes"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_get_failed"
+                    .to_string(),
+                value: Value::Counter(0f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_get_received"
+                    .to_string(),
+                value: Value::Counter(4596f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_get_received_bytes"
+                    .to_string(),
+                value: Value::Counter(353892f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_get_sent"
+                    .to_string(),
+                value: Value::Counter(4734f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_get_sent_bytes"
+                    .to_string(),
+                value: Value::Counter(364518f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_network_inbound_conn_throttler_allowed"
                     .to_string(),
                 value: Value::Counter(19f64),
@@ -2999,9 +3143,21 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_network_peerlist_received_bytes"
+                    .to_string(),
+                value: Value::Counter(1.34188214e+08f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_network_peerlist_sent"
                     .to_string(),
                 value: Value::Counter(57975f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_peerlist_sent_bytes"
+                    .to_string(),
+                value: Value::Counter(1.34280004e+08f64),
                 ..Default::default()
             },
             &Metric {
@@ -3035,7 +3191,19 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_network_ping_received_bytes"
+                    .to_string(),
+                value: Value::Counter(154521f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_network_ping_sent"
+                    .to_string(),
+                value: Value::Counter(154530f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_ping_sent_bytes"
                     .to_string(),
                 value: Value::Counter(154530f64),
                 ..Default::default()
@@ -3053,9 +3221,21 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_network_pong_received_bytes"
+                    .to_string(),
+                value: Value::Counter(309042f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_network_pong_sent"
                     .to_string(),
                 value: Value::Counter(154521f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_pong_sent_bytes"
+                    .to_string(),
+                value: Value::Counter(309042f64),
                 ..Default::default()
             },
             &Metric {
@@ -3071,9 +3251,21 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_network_pull_query_received_bytes"
+                    .to_string(),
+                value: Value::Counter(4.42023813e+08f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_network_pull_query_sent"
                     .to_string(),
                 value: Value::Counter(5.72831e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_pull_query_sent_bytes"
+                    .to_string(),
+                value: Value::Counter(4.4107987e+08f64),
                 ..Default::default()
             },
             &Metric {
@@ -3089,9 +3281,21 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_network_push_query_received_bytes"
+                    .to_string(),
+                value: Value::Counter(2.384757172e+09f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_network_push_query_sent"
                     .to_string(),
                 value: Value::Counter(342523f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_push_query_sent_bytes"
+                    .to_string(),
+                value: Value::Counter(2.386930255e+09f64),
                 ..Default::default()
             },
             &Metric {
@@ -3107,9 +3311,21 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_network_put_received_bytes"
+                    .to_string(),
+                value: Value::Counter(4.42895033e+09f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_network_put_sent"
                     .to_string(),
                 value: Value::Counter(1.437383e+06f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_put_sent_bytes"
+                    .to_string(),
+                value: Value::Counter(4.428109922e+09f64),
                 ..Default::default()
             },
             &Metric {
@@ -3149,9 +3365,21 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_network_version_received_bytes"
+                    .to_string(),
+                value: Value::Counter(4126f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_network_version_sent"
                     .to_string(),
                 value: Value::Counter(24f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_network_version_sent_bytes"
+                    .to_string(),
+                value: Value::Counter(4104f64),
                 ..Default::default()
             },
             &Metric {
