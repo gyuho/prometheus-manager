@@ -1,10 +1,10 @@
 [package]
 name = "prometheus-manager"
-version = "0.0.13" # https://crates.io/crates/prometheus-manager
+version = "0.0.14" # https://crates.io/crates/prometheus-manager
 edition = "2021"
 rust-version = "1.64"
 publish = true
-description = "Rust random manager"
+description = "Rust prometheus manager (parse)"
 repository = "https://github.com/gyuho/prometheus-manager"
 readme = "README.md"
 license = "Apache-2.0"

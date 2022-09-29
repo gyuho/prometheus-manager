@@ -606,6 +606,9 @@ avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_handler_unprocessed_
 # HELP avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_last_accepted_height Last height accepted
 # TYPE avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_last_accepted_height gauge
 avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_last_accepted_height 43240
+# HELP avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_last_accepted_timestamp Last accepted block timestamp
+# TYPE avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_last_accepted_timestamp gauge
+avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_last_accepted_timestamp 1000
 # HELP avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_lat_accepted_count # of observations of time (in ns) spent waiting for a response to this message
 # TYPE avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_lat_accepted_count counter
 avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_lat_accepted_count 10
@@ -2037,6 +2040,9 @@ avalanche_C_handler_unprocessed_msgs_state_summary_frontier_count 0
 # HELP avalanche_C_last_accepted_height Last height accepted
 # TYPE avalanche_C_last_accepted_height gauge
 avalanche_C_last_accepted_height 27
+# HELP avalanche_C_last_accepted_timestamp Last accepted block timestamp
+# TYPE avalanche_C_last_accepted_timestamp gauge
+avalanche_C_last_accepted_timestamp 10
 # HELP avalanche_C_lat_accepted_count # of observations of time (in ns) spent waiting for a response to this message
 # TYPE avalanche_C_lat_accepted_count counter
 avalanche_C_lat_accepted_count 8
@@ -3476,6 +3482,9 @@ avalanche_P_handler_unprocessed_msgs_state_summary_frontier_count 0
 # HELP avalanche_P_last_accepted_height Last height accepted
 # TYPE avalanche_P_last_accepted_height gauge
 avalanche_P_last_accepted_height 60
+# HELP avalanche_P_last_accepted_timestamp Last accepted block timestamp
+# TYPE avalanche_P_last_accepted_timestamp gauge
+avalanche_P_last_accepted_timestamp 100
 # HELP avalanche_P_lat_accepted_count # of observations of time (in ns) spent waiting for a response to this message
 # TYPE avalanche_P_lat_accepted_count counter
 avalanche_P_lat_accepted_count 0

@@ -719,7 +719,7 @@ fn test_find_all() {
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2133);
+    assert_eq!(s.metrics.len(), 2136);
 
     assert_eq!(
         find_all(&s.metrics, |s| s.metric.contains(
@@ -770,7 +770,7 @@ fn test_match_all_by_regex() {
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2133);
+    assert_eq!(s.metrics.len(), 2136);
 
     let re = Regex::new(r"^avalanche_(([0-9a-zA-Z]+)+){3,}_db_batch_put_size[\s\S]*$").unwrap();
     assert_eq!(
@@ -820,7 +820,7 @@ fn test_match_all_by_regex_set() {
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2133);
+    assert_eq!(s.metrics.len(), 2136);
 
     lazy_static! {
         static ref REGEXES: Vec<String> = vec![
@@ -1235,7 +1235,7 @@ fn test_apply_rules() {
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2133);
+    assert_eq!(s.metrics.len(), 2136);
 
     let rules = Rules::load("artifacts/avalanchego.rules.yaml").unwrap();
     let matched = apply_rules(&s.metrics, rules).unwrap();
@@ -1516,6 +1516,12 @@ fn test_apply_rules() {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_last_accepted_height"
                     .to_string(),
                 value: Value::Gauge(43240f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_last_accepted_timestamp"
+                    .to_string(),
+                value: Value::Gauge(1000f64),
                 ..Default::default()
             },
             &Metric {
@@ -2079,6 +2085,12 @@ fn test_apply_rules() {
                 ..Default::default()
             },
             &Metric {
+                metric: "avalanche_C_last_accepted_timestamp"
+                    .to_string(),
+                value: Value::Gauge(10f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_C_polls_failed"
                     .to_string(),
                 value: Value::Counter(0f64),
@@ -2394,6 +2406,12 @@ fn test_apply_rules() {
                 metric: "avalanche_P_last_accepted_height"
                     .to_string(),
                 value: Value::Gauge(60f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_P_last_accepted_timestamp"
+                    .to_string(),
+                value: Value::Gauge(100f64),
                 ..Default::default()
             },
             &Metric {
