@@ -1,6 +1,6 @@
 [package]
 name = "prometheus-manager"
-version = "0.0.15" # https://crates.io/crates/prometheus-manager
+version = "0.0.16" # https://crates.io/crates/prometheus-manager
 edition = "2021"
 rust-version = "1.64"
 publish = true
@@ -15,9 +15,9 @@ human-readable = "0.0.1"
 lazy_static = "1.4.0"
 log = "0.4.17"
 regex = "1.6.0"
-serde = { version = "1.0.145", features = ["derive"] }
-serde_yaml = "0.9.13" # https://github.com/dtolnay/serde-yaml/releases
+serde = { version = "1.0.147", features = ["derive"] }
+serde_yaml = "0.9.14" # https://github.com/dtolnay/serde-yaml/releases
 
 [dev-dependencies]
 env_logger = "0.9.1"
-rust-embed = "6.4.1"
+rust-embed = "6.4.2"
