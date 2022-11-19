@@ -1,8 +1,8 @@
 [package]
 name = "prometheus-manager"
-version = "0.0.16" # https://crates.io/crates/prometheus-manager
+version = "0.0.17" # https://crates.io/crates/prometheus-manager
 edition = "2021"
-rust-version = "1.64"
+rust-version = "1.65"
 publish = true
 description = "Rust prometheus manager (parse)"
 repository = "https://github.com/gyuho/prometheus-manager"
@@ -10,11 +10,11 @@ readme = "README.md"
 license = "Apache-2.0"
 
 [dependencies]
-chrono = "0.4.22"
+chrono = "0.4.23"
 human-readable = "0.0.1"
 lazy_static = "1.4.0"
 log = "0.4.17"
-regex = "1.6.0"
+regex = "1.7.0"
 serde = { version = "1.0.147", features = ["derive"] }
 serde_yaml = "0.9.14" # https://github.com/dtolnay/serde-yaml/releases
 
