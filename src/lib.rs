@@ -459,7 +459,7 @@ impl Scrape {
                     // Parse timestamp or use given sample time
                     let timestamp = if let Some(Ok(ts_millis)) = timestamp.map(|x| x.parse::<i64>())
                     {
-                        Some(Utc.timestamp_millis(ts_millis))
+                        Some(Utc.timestamp_millis_opt(ts_millis).unwrap())
                     } else {
                         None
                     };
@@ -633,7 +633,7 @@ avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum 4.5043750
                     .map(pair_to_string)
                     .collect()
             )),
-            timestamp: Some(Utc.timestamp_millis(1395066363000)),
+            timestamp: Some(Utc.timestamp_millis_opt(1395066363000).unwrap()),
         }
     );
 
@@ -649,7 +649,7 @@ avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_db_has_sum 4.5043750
                     .map(pair_to_string)
                     .collect()
             )),
-            timestamp: Some(Utc.timestamp_millis(1395066363000)),
+            timestamp: Some(Utc.timestamp_millis_opt(1395066363000).unwrap()),
         }
     );
 
