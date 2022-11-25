@@ -19,5 +19,5 @@ serde = { version = "1.0.147", features = ["derive"] }
 serde_yaml = "0.9.14" # https://github.com/dtolnay/serde-yaml/releases
 
 [dev-dependencies]
-env_logger = "0.9.1"
+env_logger = "0.10.0"
 rust-embed = "6.4.2"
