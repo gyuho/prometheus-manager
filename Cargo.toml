@@ -1,6 +1,6 @@
 [package]
 name = "prometheus-manager"
-version = "0.0.18" # https://crates.io/crates/prometheus-manager
+version = "0.0.19" # https://crates.io/crates/prometheus-manager
 edition = "2021"
 rust-version = "1.65"
 publish = true
@@ -15,7 +15,7 @@ human-readable = "0.0.1"
 lazy_static = "1.4.0"
 log = "0.4.17"
 regex = "1.7.0"
-serde = { version = "1.0.147", features = ["derive"] }
+serde = { version = "1.0.148", features = ["derive"] }
 serde_yaml = "0.9.14" # https://github.com/dtolnay/serde-yaml/releases
 
 [dev-dependencies]

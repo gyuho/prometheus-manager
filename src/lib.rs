@@ -718,7 +718,7 @@ fn test_find_all() {
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2137);
+    assert_eq!(s.metrics.len(), 2139);
 
     assert_eq!(
         find_all(&s.metrics, |s| s.metric.contains(
@@ -769,7 +769,7 @@ fn test_match_all_by_regex() {
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2137);
+    assert_eq!(s.metrics.len(), 2139);
 
     let re = Regex::new(r"^avalanche_(([0-9a-zA-Z]+)+){3,}_db_batch_put_size[\s\S]*$").unwrap();
     assert_eq!(
@@ -819,7 +819,7 @@ fn test_match_all_by_regex_set() {
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2137);
+    assert_eq!(s.metrics.len(), 2139);
 
     lazy_static! {
         static ref REGEXES: Vec<String> = vec![
@@ -1234,7 +1234,7 @@ fn test_apply_rules() {
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2137);
+    assert_eq!(s.metrics.len(), 2139);
 
     let rules = Rules::load("artifacts/avalanchego.rules.yaml").unwrap();
     let matched = apply_rules(&s.metrics, rules).unwrap();
@@ -1539,6 +1539,18 @@ fn test_apply_rules() {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_chain_state_tx_accepted_count"
                     .to_string(),
                 value: Value::Counter(1230f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_eth_chain_txs_accepted"
+                    .to_string(),
+                value: Value::Counter(1291f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_eth_chain_txs_processed"
+                    .to_string(),
+                value: Value::Counter(1291f64),
                 ..Default::default()
             },
             &Metric {
