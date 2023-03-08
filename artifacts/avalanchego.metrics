@@ -4618,33 +4618,33 @@ avalanche_X_tx_jobs_cache_put_count 0
 # HELP avalanche_X_tx_jobs_cache_put_sum Sum of time (in ns) of a put
 # TYPE avalanche_X_tx_jobs_cache_put_sum gauge
 avalanche_X_tx_jobs_cache_put_sum 0
-# HELP avalanche_X_txs_accepted_count # of observations of time (in ns) from issuance of a transaction(s) to its acceptance
-# TYPE avalanche_X_txs_accepted_count counter
-avalanche_X_txs_accepted_count 0
-# HELP avalanche_X_txs_accepted_sum Sum of time (in ns) from issuance of a transaction(s) to its acceptance
-# TYPE avalanche_X_txs_accepted_sum gauge
-avalanche_X_txs_accepted_sum 0
-# HELP avalanche_X_txs_polls_accepted_count # of observations of number of polls from issuance of a transaction(s) to its acceptance
-# TYPE avalanche_X_txs_polls_accepted_count counter
-avalanche_X_txs_polls_accepted_count 0
-# HELP avalanche_X_txs_polls_accepted_sum Sum of number of polls from issuance of a transaction(s) to its acceptance
-# TYPE avalanche_X_txs_polls_accepted_sum gauge
-avalanche_X_txs_polls_accepted_sum 0
-# HELP avalanche_X_txs_polls_rejected_count # of observations of number of polls from issuance of a transaction(s) to its rejection
-# TYPE avalanche_X_txs_polls_rejected_count counter
-avalanche_X_txs_polls_rejected_count 0
-# HELP avalanche_X_txs_polls_rejected_sum Sum of number of polls from issuance of a transaction(s) to its rejection
-# TYPE avalanche_X_txs_polls_rejected_sum gauge
-avalanche_X_txs_polls_rejected_sum 0
-# HELP avalanche_X_txs_processing Number of currently processing txs
-# TYPE avalanche_X_txs_processing gauge
-avalanche_X_txs_processing 0
-# HELP avalanche_X_txs_rejected_count # of observations of time (in ns) from issuance of a transaction(s) to its rejection
-# TYPE avalanche_X_txs_rejected_count counter
-avalanche_X_txs_rejected_count 0
-# HELP avalanche_X_txs_rejected_sum Sum of time (in ns) from issuance of a transaction(s) to its rejection
-# TYPE avalanche_X_txs_rejected_sum gauge
-avalanche_X_txs_rejected_sum 0
+# HELP avalanche_X_avalanche_txs_accepted_count # of observations of time (in ns) from issuance of a transaction(s) to its acceptance
+# TYPE avalanche_X_avalanche_txs_accepted_count counter
+avalanche_X_avalanche_txs_accepted_count 0
+# HELP avalanche_X_avalanche_txs_accepted_sum Sum of time (in ns) from issuance of a transaction(s) to its acceptance
+# TYPE avalanche_X_avalanche_txs_accepted_sum gauge
+avalanche_X_avalanche_txs_accepted_sum 0
+# HELP avalanche_X_avalanche_txs_polls_accepted_count # of observations of number of polls from issuance of a transaction(s) to its acceptance
+# TYPE avalanche_X_avalanche_txs_polls_accepted_count counter
+avalanche_X_avalanche_txs_polls_accepted_count 0
+# HELP avalanche_X_avalanche_txs_polls_accepted_sum Sum of number of polls from issuance of a transaction(s) to its acceptance
+# TYPE avalanche_X_avalanche_txs_polls_accepted_sum gauge
+avalanche_X_avalanche_txs_polls_accepted_sum 0
+# HELP avalanche_X_avalanche_txs_polls_rejected_count # of observations of number of polls from issuance of a transaction(s) to its rejection
+# TYPE avalanche_X_avalanche_txs_polls_rejected_count counter
+avalanche_X_avalanche_txs_polls_rejected_count 0
+# HELP avalanche_X_avalanche_txs_polls_rejected_sum Sum of number of polls from issuance of a transaction(s) to its rejection
+# TYPE avalanche_X_avalanche_txs_polls_rejected_sum gauge
+avalanche_X_avalanche_txs_polls_rejected_sum 0
+# HELP avalanche_X_avalanche_txs_processing Number of currently processing txs
+# TYPE avalanche_X_avalanche_txs_processing gauge
+avalanche_X_avalanche_txs_processing 0
+# HELP avalanche_X_avalanche_txs_rejected_count # of observations of time (in ns) from issuance of a transaction(s) to its rejection
+# TYPE avalanche_X_avalanche_txs_rejected_count counter
+avalanche_X_avalanche_txs_rejected_count 0
+# HELP avalanche_X_avalanche_txs_rejected_sum Sum of time (in ns) from issuance of a transaction(s) to its rejection
+# TYPE avalanche_X_avalanche_txs_rejected_sum gauge
+avalanche_X_avalanche_txs_rejected_sum 0
 # HELP avalanche_X_virtuous_tx_processing Number of currently processing virtuous transaction(s)
 # TYPE avalanche_X_virtuous_tx_processing gauge
 avalanche_X_virtuous_tx_processing 0
@@ -4834,39 +4834,39 @@ avalanche_X_vtx_rejected_sum 0
 # HELP avalanche_X_vtx_requests Number of outstanding vertex requests
 # TYPE avalanche_X_vtx_requests gauge
 avalanche_X_vtx_requests 0
-# HELP avalanche_X_whitelist_tx_accepted_count # of observations of time (in ns) from issuance of a whitelist transaction(s) to its acceptance
-# TYPE avalanche_X_whitelist_tx_accepted_count counter
-avalanche_X_whitelist_tx_accepted_count 0
-# HELP avalanche_X_whitelist_tx_accepted_sum Sum of time (in ns) from issuance of a whitelist transaction(s) to its acceptance
-# TYPE avalanche_X_whitelist_tx_accepted_sum gauge
-avalanche_X_whitelist_tx_accepted_sum 0
-# HELP avalanche_X_whitelist_tx_polls_accepted_count # of observations of number of polls from issuance of a whitelist transaction(s) to its acceptance
-# TYPE avalanche_X_whitelist_tx_polls_accepted_count counter
-avalanche_X_whitelist_tx_polls_accepted_count 0
-# HELP avalanche_X_whitelist_tx_polls_accepted_sum Sum of number of polls from issuance of a whitelist transaction(s) to its acceptance
-# TYPE avalanche_X_whitelist_tx_polls_accepted_sum gauge
-avalanche_X_whitelist_tx_polls_accepted_sum 0
-# HELP avalanche_X_whitelist_tx_polls_rejected_count # of observations of number of polls from issuance of a whitelist transaction(s) to its rejection
-# TYPE avalanche_X_whitelist_tx_polls_rejected_count counter
-avalanche_X_whitelist_tx_polls_rejected_count 0
-# HELP avalanche_X_whitelist_tx_polls_rejected_sum Sum of number of polls from issuance of a whitelist transaction(s) to its rejection
-# TYPE avalanche_X_whitelist_tx_polls_rejected_sum gauge
-avalanche_X_whitelist_tx_polls_rejected_sum 0
-# HELP avalanche_X_whitelist_tx_processing Number of currently processing whitelist_tx
-# TYPE avalanche_X_whitelist_tx_processing gauge
-avalanche_X_whitelist_tx_processing 0
-# HELP avalanche_X_whitelist_tx_rejected_count # of observations of time (in ns) from issuance of a whitelist transaction(s) to its rejection
-# TYPE avalanche_X_whitelist_tx_rejected_count counter
-avalanche_X_whitelist_tx_rejected_count 0
-# HELP avalanche_X_whitelist_tx_rejected_sum Sum of time (in ns) from issuance of a whitelist transaction(s) to its rejection
-# TYPE avalanche_X_whitelist_tx_rejected_sum gauge
-avalanche_X_whitelist_tx_rejected_sum 0
-# HELP avalanche_X_whitelist_vtx_issue_failure Number of DAG linearization request issue failed (verification failure)
-# TYPE avalanche_X_whitelist_vtx_issue_failure counter
-avalanche_X_whitelist_vtx_issue_failure 0
-# HELP avalanche_X_whitelist_vtx_issue_success Number of DAG linearization request issued (pending, not necessarily accepted)
-# TYPE avalanche_X_whitelist_vtx_issue_success counter
-avalanche_X_whitelist_vtx_issue_success 0
+# HELP avalanche_X_avalanche_whitelist_tx_accepted_count # of observations of time (in ns) from issuance of a whitelist transaction(s) to its acceptance
+# TYPE avalanche_X_avalanche_whitelist_tx_accepted_count counter
+avalanche_X_avalanche_whitelist_tx_accepted_count 0
+# HELP avalanche_X_avalanche_whitelist_tx_accepted_sum Sum of time (in ns) from issuance of a whitelist transaction(s) to its acceptance
+# TYPE avalanche_X_avalanche_whitelist_tx_accepted_sum gauge
+avalanche_X_avalanche_whitelist_tx_accepted_sum 0
+# HELP avalanche_X_avalanche_whitelist_tx_polls_accepted_count # of observations of number of polls from issuance of a whitelist transaction(s) to its acceptance
+# TYPE avalanche_X_avalanche_whitelist_tx_polls_accepted_count counter
+avalanche_X_avalanche_whitelist_tx_polls_accepted_count 0
+# HELP avalanche_X_avalanche_whitelist_tx_polls_accepted_sum Sum of number of polls from issuance of a whitelist transaction(s) to its acceptance
+# TYPE avalanche_X_avalanche_whitelist_tx_polls_accepted_sum gauge
+avalanche_X_avalanche_whitelist_tx_polls_accepted_sum 0
+# HELP avalanche_X_avalanche_whitelist_tx_polls_rejected_count # of observations of number of polls from issuance of a whitelist transaction(s) to its rejection
+# TYPE avalanche_X_avalanche_whitelist_tx_polls_rejected_count counter
+avalanche_X_avalanche_whitelist_tx_polls_rejected_count 0
+# HELP avalanche_X_avalanche_whitelist_tx_polls_rejected_sum Sum of number of polls from issuance of a whitelist transaction(s) to its rejection
+# TYPE avalanche_X_avalanche_whitelist_tx_polls_rejected_sum gauge
+avalanche_X_avalanche_whitelist_tx_polls_rejected_sum 0
+# HELP avalanche_X_avalanche_whitelist_tx_processing Number of currently processing whitelist_tx
+# TYPE avalanche_X_avalanche_whitelist_tx_processing gauge
+avalanche_X_avalanche_whitelist_tx_processing 0
+# HELP avalanche_X_avalanche_whitelist_tx_rejected_count # of observations of time (in ns) from issuance of a whitelist transaction(s) to its rejection
+# TYPE avalanche_X_avalanche_whitelist_tx_rejected_count counter
+avalanche_X_avalanche_whitelist_tx_rejected_count 0
+# HELP avalanche_X_avalanche_whitelist_tx_rejected_sum Sum of time (in ns) from issuance of a whitelist transaction(s) to its rejection
+# TYPE avalanche_X_avalanche_whitelist_tx_rejected_sum gauge
+avalanche_X_avalanche_whitelist_tx_rejected_sum 0
+# HELP avalanche_X_avalanche_whitelist_vtx_issue_failure Number of DAG linearization request issue failed (verification failure)
+# TYPE avalanche_X_avalanche_whitelist_vtx_issue_failure counter
+avalanche_X_avalanche_whitelist_vtx_issue_failure 0
+# HELP avalanche_X_avalanche_whitelist_vtx_issue_success Number of DAG linearization request issued (pending, not necessarily accepted)
+# TYPE avalanche_X_avalanche_whitelist_vtx_issue_success counter
+avalanche_X_avalanche_whitelist_vtx_issue_success 0
 # HELP avalanche_db_batch_delete_count # of observations of time (in ns) of a batch_delete
 # TYPE avalanche_db_batch_delete_count counter
 avalanche_db_batch_delete_count 166

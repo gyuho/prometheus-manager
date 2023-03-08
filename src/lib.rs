@@ -2677,126 +2677,129 @@ fn test_apply_rules() {
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
+
             &Metric {
-                metric: "avalanche_X_txs_accepted_count"
+                metric: "avalanche_X_avalanche_txs_accepted_count"
                     .to_string(),
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_txs_accepted_sum"
+                metric: "avalanche_X_avalanche_txs_accepted_sum"
                     .to_string(),
                 value: Value::Gauge(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_txs_polls_accepted_count"
+                metric: "avalanche_X_avalanche_txs_polls_accepted_count"
                     .to_string(),
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_txs_polls_accepted_sum"
+                metric: "avalanche_X_avalanche_txs_polls_accepted_sum"
                     .to_string(),
                 value: Value::Gauge(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_txs_polls_rejected_count"
+                metric: "avalanche_X_avalanche_txs_polls_rejected_count"
                     .to_string(),
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_txs_polls_rejected_sum"
+                metric: "avalanche_X_avalanche_txs_polls_rejected_sum"
                     .to_string(),
                 value: Value::Gauge(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_txs_processing"
+                metric: "avalanche_X_avalanche_txs_processing"
                     .to_string(),
                 value: Value::Gauge(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_txs_rejected_count"
+                metric: "avalanche_X_avalanche_txs_rejected_count"
                     .to_string(),
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_txs_rejected_sum"
+                metric: "avalanche_X_avalanche_txs_rejected_sum"
                     .to_string(),
                 value: Value::Gauge(0f64),
                 ..Default::default()
             },
+
             &Metric {
-                metric: "avalanche_X_whitelist_tx_accepted_count"
+                metric: "avalanche_X_avalanche_whitelist_tx_accepted_count"
                     .to_string(),
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_whitelist_tx_accepted_sum"
+                metric: "avalanche_X_avalanche_whitelist_tx_accepted_sum"
                     .to_string(),
                 value: Value::Gauge(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_whitelist_tx_polls_accepted_count"
+                metric: "avalanche_X_avalanche_whitelist_tx_polls_accepted_count"
                     .to_string(),
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_whitelist_tx_polls_accepted_sum"
+                metric: "avalanche_X_avalanche_whitelist_tx_polls_accepted_sum"
                     .to_string(),
                 value: Value::Gauge(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_whitelist_tx_polls_rejected_count"
+                metric: "avalanche_X_avalanche_whitelist_tx_polls_rejected_count"
                     .to_string(),
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_whitelist_tx_polls_rejected_sum"
+                metric: "avalanche_X_avalanche_whitelist_tx_polls_rejected_sum"
                     .to_string(),
                 value: Value::Gauge(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_whitelist_tx_processing"
+                metric: "avalanche_X_avalanche_whitelist_tx_processing"
                     .to_string(),
                 value: Value::Gauge(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_whitelist_tx_rejected_count"
+                metric: "avalanche_X_avalanche_whitelist_tx_rejected_count"
                     .to_string(),
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_whitelist_tx_rejected_sum"
+                metric: "avalanche_X_avalanche_whitelist_tx_rejected_sum"
                     .to_string(),
                 value: Value::Gauge(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_whitelist_vtx_issue_failure"
+                metric: "avalanche_X_avalanche_whitelist_vtx_issue_failure"
                     .to_string(),
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_whitelist_vtx_issue_success"
+                metric: "avalanche_X_avalanche_whitelist_vtx_issue_success"
                     .to_string(),
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
+
             &Metric {
                 metric: "avalanche_db_batch_put_count"
                     .to_string(),
@@ -3509,7 +3512,7 @@ fn test_apply_rules() {
                 ..Default::default()
             },
         ].iter().enumerate() {
-        assert_eq!(matched[i], v.clone());
+        assert_eq!(matched[i], v.clone(), "mismatched at {}", i);
 
         cnt = i + 1;
     };
