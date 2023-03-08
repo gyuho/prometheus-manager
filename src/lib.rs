@@ -839,6 +839,7 @@ fn test_match_all_by_regex_set() {
             r"^avalanche_[C|P|X]_db_read_size_sum$".to_string(),
             r"^avalanche_[C|P|X]_db_write_size_sum$".to_string(),
             r"^avalanche_[C|P|X]_polls_[\s\S]*$".to_string(),
+            r"^avalanche_X_(avalanche|snowman)_polls_[\s\S]*$".to_string(),
         ];
     }
 
@@ -1033,13 +1034,13 @@ fn test_match_all_by_regex_set() {
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_polls_failed"
+                metric: "avalanche_X_avalanche_polls_failed"
                     .to_string(),
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_polls_successful"
+                metric: "avalanche_X_avalanche_polls_successful"
                     .to_string(),
                 value: Value::Counter(0f64),
                 ..Default::default()
@@ -2665,14 +2666,15 @@ fn test_apply_rules() {
                 value: Value::Gauge(0f64),
                 ..Default::default()
             },
+
             &Metric {
-                metric: "avalanche_X_polls_failed"
+                metric: "avalanche_X_avalanche_polls_failed"
                     .to_string(),
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
             &Metric {
-                metric: "avalanche_X_polls_successful"
+                metric: "avalanche_X_avalanche_polls_successful"
                     .to_string(),
                 value: Value::Counter(0f64),
                 ..Default::default()

@@ -4582,12 +4582,12 @@ avalanche_X_poll_duration_sum 0
 # HELP avalanche_X_polls Number of pending network polls
 # TYPE avalanche_X_polls gauge
 avalanche_X_polls 0
-# HELP avalanche_X_polls_failed Number of failed polls
-# TYPE avalanche_X_polls_failed counter
-avalanche_X_polls_failed 0
-# HELP avalanche_X_polls_successful Number of successful polls
-# TYPE avalanche_X_polls_successful counter
-avalanche_X_polls_successful 0
+# HELP avalanche_X_avalanche_polls_failed Number of failed polls
+# TYPE avalanche_X_avalanche_polls_failed counter
+avalanche_X_avalanche_polls_failed 0
+# HELP avalanche_X_avalanche_polls_successful Number of successful polls
+# TYPE avalanche_X_avalanche_polls_successful counter
+avalanche_X_avalanche_polls_successful 0
 # HELP avalanche_X_pull_query_failed_benched # of times a pull_query request was not sent because the node was benched
 # TYPE avalanche_X_pull_query_failed_benched counter
 avalanche_X_pull_query_failed_benched 0
