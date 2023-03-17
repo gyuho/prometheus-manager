@@ -4648,6 +4648,13 @@ avalanche_X_avalanche_txs_rejected_sum 0
 # HELP avalanche_X_virtuous_tx_processing Number of currently processing virtuous transaction(s)
 # TYPE avalanche_X_virtuous_tx_processing gauge
 avalanche_X_virtuous_tx_processing 0
+
+
+# HELP avalanche_X_vm_avalanche_base_txs_accepted Number of base transactions accepted
+# TYPE avalanche_X_vm_avalanche_base_txs_accepted counter
+avalanche_X_vm_avalanche_base_txs_accepted 77777
+
+
 # HELP avalanche_X_vm_index_cache_get_count # of observations of time (in ns) of a get
 # TYPE avalanche_X_vm_index_cache_get_count counter
 avalanche_X_vm_index_cache_get_count 0

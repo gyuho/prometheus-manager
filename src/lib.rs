@@ -718,7 +718,7 @@ fn test_find_all() {
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2139);
+    assert_eq!(s.metrics.len(), 2140);
 
     assert_eq!(
         find_all(&s.metrics, |s| s.metric.contains(
@@ -769,7 +769,7 @@ fn test_match_all_by_regex() {
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2139);
+    assert_eq!(s.metrics.len(), 2140);
 
     let re = Regex::new(r"^avalanche_(([0-9a-zA-Z]+)+){3,}_db_batch_put_size[\s\S]*$").unwrap();
     assert_eq!(
@@ -819,7 +819,7 @@ fn test_match_all_by_regex_set() {
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2139);
+    assert_eq!(s.metrics.len(), 2140);
 
     lazy_static! {
         static ref REGEXES: Vec<String> = vec![
@@ -1235,7 +1235,7 @@ fn test_apply_rules() {
     let metrics_raw = std::str::from_utf8(metrics_raw.data.as_ref()).unwrap();
 
     let s = Scrape::from_bytes(metrics_raw.as_bytes()).unwrap();
-    assert_eq!(s.metrics.len(), 2139);
+    assert_eq!(s.metrics.len(), 2140);
 
     let rules = Rules::load("artifacts/avalanchego.rules.yaml").unwrap();
     let matched = apply_rules(&s.metrics, rules).unwrap();
@@ -2736,6 +2736,12 @@ fn test_apply_rules() {
             },
 
             &Metric {
+                metric: "avalanche_X_vm_avalanche_base_txs_accepted"
+                    .to_string(),
+                value: Value::Counter(77777f64),
+                ..Default::default()
+            },
+            &Metric {
                 metric: "avalanche_X_avalanche_whitelist_tx_accepted_count"
                     .to_string(),
                 value: Value::Counter(0f64),
@@ -2801,6 +2807,7 @@ fn test_apply_rules() {
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
+     
 
             &Metric {
                 metric: "avalanche_db_batch_put_count"
