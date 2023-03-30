@@ -1,0 +1,4 @@
+# example to show just loading from YAML without escaping/raw str just works
+
+filters:
+  - regex: ^*$

@@ -3528,6 +3528,13 @@ fn test_apply_rules() {
     assert_eq!(cnt, matched.len());
 
     log::info!("matched total {} metrics", cnt);
+
+    let rules = Rules::load("artifacts/avalanchego.rules.all.yaml").unwrap();
+    let matched = apply_rules(&s.metrics, rules).unwrap();
+    for v in matched.iter() {
+        println!("metric: {:?}", v);
+    }
+    log::info!("matched total {} metrics", matched.len());
 }
 
 pub fn pair_to_string(pair: &(&str, &str)) -> (String, String) {
