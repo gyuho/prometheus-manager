@@ -22,8 +22,17 @@ cargo fmt --all --verbose -- --check
 rustup default nightly
 cargo +nightly fmt --all -- --config-path .rustfmt.nightly.toml --verbose --check || true
 
-# TODO: enable this
-cargo +nightly clippy --all --all-features -- -D warnings || true
+# ref. https://github.com/rust-lang/rust-clippy
+cargo +nightly clippy --all --all-features -- \
+-D clippy::suspicious \
+-D clippy::style \
+-D clippy::complexity \
+-D clippy::perf \
+-D clippy::pedantic \
+-D clippy::restriction \
+-D clippy::nursery \
+-D clippy::cargo \
+|| true
 
 rustup default stable
 

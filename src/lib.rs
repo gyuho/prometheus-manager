@@ -1068,15 +1068,17 @@ impl Rules {
             )
         })?;
         serde_yaml::from_reader(f)
-            .map_err(|e| Error::new(ErrorKind::InvalidInput, format!("invalid YAML: {}", e)))
+            .map_err(|e| Error::new(ErrorKind::InvalidInput, format!("invalid YAML: {e}")))
     }
 
     /// Syncs the "Rules" to the file.
     pub fn sync(&self, file_path: &str) -> io::Result<()> {
-        log::info!("syncing Rules to '{}'", file_path);
+        log::info!("syncing rules to '{file_path}'");
         let path = Path::new(file_path);
-        let parent_dir = path.parent().expect("unexpected None file path parent");
-        fs::create_dir_all(parent_dir)?;
+        if let Some(parent_dir) = path.parent() {
+            log::info!("creating parent dir '{}'", parent_dir.display());
+            fs::create_dir_all(parent_dir)?;
+        }
 
         let ret = serde_yaml::to_string(self);
         let d = match ret {
@@ -1084,14 +1086,14 @@ impl Rules {
             Err(e) => {
                 return Err(Error::new(
                     ErrorKind::Other,
-                    format!("failed to serialize Node to YAML {}", e),
+                    format!("failed to serialize Node to YAML {e}"),
                 ));
             }
         };
         let mut f = File::create(file_path)?;
         f.write_all(d.as_bytes())?;
 
-        Ok(())
+        return Ok(());
     }
 }
 
@@ -1121,7 +1123,7 @@ pub struct Filter {
 }
 
 /// Returns all metrics that evaluate to "true" based on the rules.
-/// If no filter has a label specified, it uses RegexSet for all regexes.
+/// If no filter has a label specified, it uses `RegexSet` for all regexes.
 /// TODO: optimize using more RegexSet without labels...
 /// TODO: Support delta-based divides.
 pub fn apply_rules(data: &[Metric], rules: Rules) -> io::Result<Vec<&Metric>> {
@@ -1129,7 +1131,7 @@ pub fn apply_rules(data: &[Metric], rules: Rules) -> io::Result<Vec<&Metric>> {
     // so we don't compile multiple times for each iteration
     let mut regexes: Vec<Regex> = Vec::with_capacity(rules.filters.len());
     let mut labels_exist = false;
-    for r in rules.filters.iter() {
+    for r in &rules.filters {
         let regex = Regex::new(r.regex.as_str()).map_err(|e| {
             Error::new(
                 ErrorKind::Other,
@@ -1205,15 +1207,12 @@ pub fn apply_rules(data: &[Metric], rules: Rules) -> io::Result<Vec<&Metric>> {
         let reset = RegexSet::new(regexes).map_err(|e| {
             Error::new(
                 ErrorKind::Other,
-                format!(
-                    "failed to create regex set for the rules {:?} ({})",
-                    rules, e
-                ),
+                format!("failed to create regex set for the rules {:?} ({e})", rules),
             )
         })?;
         match_all_by_regex_set(data, reset)
     };
-    Ok(found)
+    return Ok(found);
 }
 
 /// RUST_LOG=debug cargo test --all-features --package prometheus-manager --lib -- test_apply_rules --exact --show-output
@@ -1540,6 +1539,18 @@ fn test_apply_rules() {
                 metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_chain_state_tx_accepted_count"
                     .to_string(),
                 value: Value::Counter(1230f64),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_eth_chain_block_gas_used_accepted"
+                    .to_string(),
+                value: Value::Counter(1.1928465e+07),
+                ..Default::default()
+            },
+            &Metric {
+                metric: "avalanche_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_vm_eth_chain_block_gas_used_processed"
+                    .to_string(),
+                value: Value::Counter(1.248318e+07),
                 ..Default::default()
             },
             &Metric {
@@ -2807,7 +2818,6 @@ fn test_apply_rules() {
                 value: Value::Counter(0f64),
                 ..Default::default()
             },
-     
 
             &Metric {
                 metric: "avalanche_db_batch_put_count"
@@ -3530,14 +3540,15 @@ fn test_apply_rules() {
     log::info!("matched total {} metrics", cnt);
 }
 
+#[must_use]
 pub fn pair_to_string(pair: &(&str, &str)) -> (String, String) {
-    (pair.0.to_string(), pair.1.to_string())
+    return (pair.0.to_owned(), pair.1.to_owned());
 }
 
 fn parse_golang_float(s: &str) -> Result<f64, <f64 as std::str::FromStr>::Err> {
     match s.to_lowercase().as_str() {
-        "nan" => Ok(std::f64::NAN), // f64::parse doesn't recognize 'nan'
-        s => s.parse::<f64>(),      // f64::parse expects lowercase [+-]inf
+        "nan" => return Ok(std::f64::NAN), // f64::parse doesn't recognize 'nan'
+        s => return s.parse::<f64>(),      // f64::parse expects lowercase [+-]inf
     }
 }
 
